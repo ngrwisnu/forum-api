@@ -6,7 +6,7 @@ Route: `POST` `/threads`
 
 Headers:
 
-- X-USER-TOKEN: `<token>`
+- Authorization: `Bearer <token>`
 
 Request body:
 
@@ -55,7 +55,7 @@ Route: `POST` `/threads/{threadId}/comments`
 
 Headers:
 
-- X-USER-TOKEN: `<token>`
+- Authorization: `Bearer <token>`
 
 Request body:
 
@@ -119,7 +119,7 @@ Route: `DELETE` `/threads/{threadId}/comments/{commentId}`
 
 Headers:
 
-- X-USER-TOKEN: `<token>`
+- Authorization: `Bearer <token>`
 
 Request body:
 
@@ -255,7 +255,7 @@ Route: `POST` `/threads/{threadId}/comments/{commentId}/replies`
 
 Headers:
 
-- X-USER-TOKEN: `<token>`
+- Authorization: `Bearer <token>`
 
 Request body:
 
@@ -319,7 +319,7 @@ Route: `DELETE` `/threads/{threadId}/comments/{commentId}/replies/{replyId}`
 
 Headers:
 
-- X-USER-TOKEN: `<token>`
+- Authorization: `Bearer <token>`
 
 Request body:
 

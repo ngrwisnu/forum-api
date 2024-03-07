@@ -1,5 +1,6 @@
 /* istanbul ignore file */
-import { Pool } from "pg";
+import pkg from "pg";
+const { Pool } = pkg;
 
 const testConfig = {
   host: process.env.PGHOST_TEST,

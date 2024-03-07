@@ -1,9 +1,9 @@
 ### Add Thread
 
-- [ ] Returns `error` when token is not provided
-- [ ] Returns `error` when thread title or body is not provided
-- [ ] Returns `error` when payload data type is invalid
-- [ ] Returns `succeed` when token and payload are valid
+- [x] Returns `error` when token is not provided
+- [x] Returns `error` when thread title or body is not provided
+- [x] Returns `error` when payload data type is invalid
+- [x] Returns `succeed` when token and payload are valid
 
 ---
 

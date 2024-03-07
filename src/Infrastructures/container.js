@@ -23,6 +23,8 @@ import AuthenticationRepository from "../Domains/authentications/AuthenticationR
 import AuthenticationRepositoryPostgres from "./repository/AuthenticationRepositoryPostgres.js";
 import LogoutUserUseCase from "../Applications/use_case/LogoutUserUseCase.js";
 import RefreshAuthenticationUseCase from "../Applications/use_case/RefreshAuthenticationUseCase.js";
+import ThreadRepositoryPostgre from "./repository/ThreadRepositoryPostgre.js";
+import PostThreadUseCase from "../Applications/use_case/thread/PostThreadUseCase.js";
 
 // creating container
 const container = createContainer();
@@ -72,6 +74,20 @@ container.register([
       dependencies: [
         {
           concrete: Jwt.token,
+        },
+      ],
+    },
+  },
+  {
+    key: ThreadRepositoryPostgre.name,
+    Class: ThreadRepositoryPostgre,
+    parameter: {
+      dependencies: [
+        {
+          concrete: pool,
+        },
+        {
+          concrete: nanoid,
         },
       ],
     },
@@ -147,6 +163,23 @@ container.register([
         },
         {
           name: "authenticationTokenManager",
+          internal: AuthenticationTokenManager.name,
+        },
+      ],
+    },
+  },
+  {
+    key: PostThreadUseCase.name,
+    Class: PostThreadUseCase,
+    parameter: {
+      injectType: "destructuring",
+      dependencies: [
+        {
+          name: "threadRepository",
+          internal: ThreadRepositoryPostgre.name,
+        },
+        {
+          name: "tokenManager",
           internal: AuthenticationTokenManager.name,
         },
       ],

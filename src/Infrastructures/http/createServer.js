@@ -1,8 +1,9 @@
 import Hapi from "@hapi/hapi";
 import ClientError from "../../Commons/exceptions/ClientError.js";
 import DomainErrorTranslator from "../../Commons/exceptions/DomainErrorTranslator.js";
-import users from "../../Interfaces/http/api/users";
-import authentications from "../../Interfaces/http/api/authentications";
+import users from "../../Interfaces/http/api/users/index.js";
+import authentications from "../../Interfaces/http/api/authentications/index.js";
+import threads from "../../Interfaces/http/api/threads/index.js";
 
 const createServer = async (container) => {
   const server = Hapi.server({
@@ -17,6 +18,10 @@ const createServer = async (container) => {
     },
     {
       plugin: authentications,
+      options: { container },
+    },
+    {
+      plugin: threads,
       options: { container },
     },
   ]);
