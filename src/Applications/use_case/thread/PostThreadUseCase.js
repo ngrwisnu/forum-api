@@ -1,5 +1,5 @@
 import PostThread from "../../../Domains/threads/entities/PostThread.js";
-import TokenFormatter from "../../formatter/TokenFormatter.js";
+import AuthenticationHandler from "../../helper/AuthenticationHandler.js";
 import Validation from "../../validation/Validation.js";
 import ThreadSchema from "../../validation/threadSchema.js";
 
@@ -10,7 +10,9 @@ class PostThreadUseCase {
   }
 
   async execute(token, payload) {
-    token = TokenFormatter.purgeBearerOfToken(token);
+    await AuthenticationHandler.isAuthenticationTokenExist(token);
+    token = AuthenticationHandler.purgeBearerOfToken(token);
+
     const request = Validation.validate(ThreadSchema.POST_THREAD, payload);
 
     const user = await this._tokenManager.decodePayload(token);

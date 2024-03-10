@@ -2,6 +2,7 @@ import ThreadsTableTestHelper from "../../../../tests/ThreadsTableTestHelper";
 import UsersTableTestHelper from "../../../../tests/UsersTableTestHelper";
 import PostThread from "../../../Domains/threads/entities/PostThread";
 import PostedThread from "../../../Domains/threads/entities/PostedThread";
+import GetThread from "../../../Domains/threads/entities/getThread";
 import pool from "../../database/postgres/pool";
 import ThreadRepositoryPostgre from "../ThreadRepositoryPostgre";
 
@@ -13,6 +14,8 @@ describe("ThreadRepositoryPostgre", () => {
       password: "secret",
       fullname: "stewie griffin",
     });
+
+    await ThreadsTableTestHelper.addThread({});
   });
 
   afterAll(async () => {
@@ -62,5 +65,48 @@ describe("ThreadRepositoryPostgre", () => {
         created_at: new Date(),
       })
     );
+  });
+
+  it("should throw error when thread with specific id is not found", async () => {
+    try {
+      const fakeIdGenerator = () => "10";
+
+      const threadRepositoryPostgre = new ThreadRepositoryPostgre(
+        pool,
+        fakeIdGenerator
+      );
+
+      await threadRepositoryPostgre.getThreadById("thread-123");
+    } catch (error) {
+      expect(error).toBeDefined();
+    }
+  });
+
+  it("should return the object correctly when thread is found", async () => {
+    const fakeIdGenerator = () => "10";
+
+    const threadRepositoryPostgre = new ThreadRepositoryPostgre(
+      pool,
+      fakeIdGenerator
+    );
+
+    const result = await threadRepositoryPostgre.getThreadById("thread-1");
+
+    expect(result).toStrictEqual(new GetThread(result));
+  });
+
+  it("should throw error when thread is not exist in the database", async () => {
+    try {
+      const fakeIdGenerator = () => "10";
+
+      const threadRepositoryPostgre = new ThreadRepositoryPostgre(
+        pool,
+        fakeIdGenerator
+      );
+
+      await threadRepositoryPostgre.isThreadExist("thread-123");
+    } catch (error) {
+      expect(error).toBeDefined();
+    }
   });
 });

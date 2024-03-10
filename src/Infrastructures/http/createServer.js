@@ -4,6 +4,7 @@ import DomainErrorTranslator from "../../Commons/exceptions/DomainErrorTranslato
 import users from "../../Interfaces/http/api/users/index.js";
 import authentications from "../../Interfaces/http/api/authentications/index.js";
 import threads from "../../Interfaces/http/api/threads/index.js";
+import comments from "../../Interfaces/http/api/comments/index.js";
 
 const createServer = async (container) => {
   const server = Hapi.server({
@@ -22,6 +23,10 @@ const createServer = async (container) => {
     },
     {
       plugin: threads,
+      options: { container },
+    },
+    {
+      plugin: comments,
       options: { container },
     },
   ]);
@@ -52,7 +57,8 @@ const createServer = async (container) => {
       // penanganan server error sesuai kebutuhan
       const newResponse = h.response({
         status: "error",
-        message: "terjadi kegagalan pada server kami",
+        // message: "terjadi kegagalan pada server kami",
+        message: response,
       });
       newResponse.code(500);
       return newResponse;

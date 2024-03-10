@@ -1,4 +1,5 @@
 import InvariantError from "./InvariantError.js";
+import AuthenticationError from "./AuthenticationError.js";
 
 const DomainErrorTranslator = {
   translate(error) {
@@ -33,6 +34,9 @@ DomainErrorTranslator._directories = {
     new InvariantError("harus mengirimkan token refresh"),
   "DELETE_AUTHENTICATION_USE_CASE.PAYLOAD_NOT_MEET_DATA_TYPE_SPECIFICATION":
     new InvariantError("refresh token harus string"),
+  "AUTHENTICATION_HELPER.NOT_AUTHENTICATED": new AuthenticationError(
+    "Missing authentication"
+  ),
 };
 
 export default DomainErrorTranslator;

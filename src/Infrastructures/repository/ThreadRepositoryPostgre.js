@@ -1,5 +1,7 @@
 import ThreadRepository from "../../Domains/threads/ThreadRepository.js";
 import PostedThread from "../../Domains/threads/entities/PostedThread.js";
+import NotFoundError from "../../Commons/exceptions/NotFoundError.js";
+import GetThread from "../../Domains/threads/entities/getThread.js";
 
 class ThreadRepositoryPostgre extends ThreadRepository {
   constructor(pool, idGenerator) {
@@ -20,6 +22,34 @@ class ThreadRepositoryPostgre extends ThreadRepository {
     const result = await this._pool.query(query);
 
     return new PostedThread({ ...result.rows[0] });
+  }
+
+  async getThreadById(id) {
+    const query = {
+      text: "SELECT * FROM threads WHERE id=$1",
+      values: [id],
+    };
+
+    const result = await this._pool.query(query);
+
+    if (!result.rows.length) {
+      throw new NotFoundError("Thread not found!");
+    }
+
+    return new GetThread({ ...result.rows[0] });
+  }
+
+  async isThreadExist(id) {
+    const query = {
+      text: "SELECT id FROM threads WHERE id=$1",
+      values: [id],
+    };
+
+    const result = await this._pool.query(query);
+
+    if (!result.rows.length) {
+      throw new NotFoundError("Thread not found!");
+    }
   }
 }
 

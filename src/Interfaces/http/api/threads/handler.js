@@ -1,6 +1,4 @@
 import PostThreadUseCase from "../../../../Applications/use_case/thread/PostThreadUseCase.js";
-import AuthenticationError from "../../../../Commons/exceptions/AuthenticationError.js";
-
 class ThreadsHandler {
   constructor(container) {
     this._container = container;
@@ -10,8 +8,6 @@ class ThreadsHandler {
 
   async postThreadHandler(request, h) {
     const token = request.headers.authorization;
-
-    if (!token) throw new AuthenticationError("Missing authentication");
 
     const postThreadUseCase = this._container.getInstance(
       PostThreadUseCase.name

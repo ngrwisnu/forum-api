@@ -25,6 +25,8 @@ import LogoutUserUseCase from "../Applications/use_case/LogoutUserUseCase.js";
 import RefreshAuthenticationUseCase from "../Applications/use_case/RefreshAuthenticationUseCase.js";
 import ThreadRepositoryPostgre from "./repository/ThreadRepositoryPostgre.js";
 import PostThreadUseCase from "../Applications/use_case/thread/PostThreadUseCase.js";
+import CommentRepositoryPostgre from "./repository/CommentRepositoryPostgre.js";
+import PostCommentUseCase from "../Applications/use_case/comment/PostCommentUseCase.js";
 
 // creating container
 const container = createContainer();
@@ -81,6 +83,20 @@ container.register([
   {
     key: ThreadRepositoryPostgre.name,
     Class: ThreadRepositoryPostgre,
+    parameter: {
+      dependencies: [
+        {
+          concrete: pool,
+        },
+        {
+          concrete: nanoid,
+        },
+      ],
+    },
+  },
+  {
+    key: CommentRepositoryPostgre.name,
+    Class: CommentRepositoryPostgre,
     parameter: {
       dependencies: [
         {
@@ -174,6 +190,27 @@ container.register([
     parameter: {
       injectType: "destructuring",
       dependencies: [
+        {
+          name: "threadRepository",
+          internal: ThreadRepositoryPostgre.name,
+        },
+        {
+          name: "tokenManager",
+          internal: AuthenticationTokenManager.name,
+        },
+      ],
+    },
+  },
+  {
+    key: PostCommentUseCase.name,
+    Class: PostCommentUseCase,
+    parameter: {
+      injectType: "destructuring",
+      dependencies: [
+        {
+          name: "commentRepository",
+          internal: CommentRepositoryPostgre.name,
+        },
         {
           name: "threadRepository",
           internal: ThreadRepositoryPostgre.name,
