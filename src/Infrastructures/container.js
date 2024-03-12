@@ -28,6 +28,7 @@ import PostThreadUseCase from "../Applications/use_case/thread/PostThreadUseCase
 import CommentRepositoryPostgre from "./repository/CommentRepositoryPostgre.js";
 import PostCommentUseCase from "../Applications/use_case/comment/PostCommentUseCase.js";
 import DeleteCommentUseCase from "../Applications/use_case/comment/DeleteCommentUseCase.js";
+import GetThreadByIdUseCase from "../Applications/use_case/thread/GetThreadByIdUseCase.js";
 
 // creating container
 const container = createContainer();
@@ -198,6 +199,19 @@ container.register([
         {
           name: "tokenManager",
           internal: AuthenticationTokenManager.name,
+        },
+      ],
+    },
+  },
+  {
+    key: GetThreadByIdUseCase.name,
+    Class: GetThreadByIdUseCase,
+    parameter: {
+      injectType: "destructuring",
+      dependencies: [
+        {
+          name: "threadRepository",
+          internal: ThreadRepositoryPostgre.name,
         },
       ],
     },

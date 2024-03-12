@@ -28,8 +28,8 @@
 
 ### Get Thread Detail by ID
 
-- [ ] Returns `error` when thread is not found
-- [ ] Returns `succeed` when thread id is valid
+- [x] Returns `error` when thread is not found
+- [x] Returns `succeed` when thread id is valid
 
 ---
 
