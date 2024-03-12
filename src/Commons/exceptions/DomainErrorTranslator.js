@@ -1,5 +1,6 @@
 import InvariantError from "./InvariantError.js";
 import AuthenticationError from "./AuthenticationError.js";
+import AuthorizationError from "./AuthorizationError.js";
 
 const DomainErrorTranslator = {
   translate(error) {
@@ -36,6 +37,9 @@ DomainErrorTranslator._directories = {
     new InvariantError("refresh token harus string"),
   "AUTHENTICATION_HELPER.NOT_AUTHENTICATED": new AuthenticationError(
     "Missing authentication"
+  ),
+  "AUTHORIZATION_HELPER.UNAUTHORIZED_USER": new AuthorizationError(
+    "Unauthorized"
   ),
 };
 

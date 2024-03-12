@@ -4,7 +4,6 @@ import PostedComment from "../../../../Domains/comments/entities/PostedComment";
 import ThreadRepository from "../../../../Domains/threads/ThreadRepository";
 import JwtTokenManager from "../../../../Infrastructures/security/JwtTokenManager";
 import PostCommentUseCase from "../PostCommentUseCase";
-import NotFoundError from "../../../../Commons/exceptions/NotFoundError";
 
 describe("PostCommentUseCase", () => {
   it("should return error when token auth is not provided", async () => {
@@ -50,9 +49,7 @@ describe("PostCommentUseCase", () => {
       const mockThreadRepository = new ThreadRepository();
       mockThreadRepository.isThreadExist = jest
         .fn()
-        .mockImplementation(() =>
-          Promise.reject(new NotFoundError("thread is not found"))
-        );
+        .mockImplementation(() => Promise.reject("thread not found"));
 
       const postCommentUseCase = new PostCommentUseCase({
         commentRepository: {},
@@ -64,9 +61,7 @@ describe("PostCommentUseCase", () => {
 
       expect(mockThreadRepository.isThreadExist).toBeCalledTimes(1);
     } catch (error) {
-      expect(error).toBeDefined();
-      expect(error.statusCode).toBe(404);
-      expect(error.message).toBe("thread is not found");
+      expect(error).toBe("thread not found");
     }
   });
 

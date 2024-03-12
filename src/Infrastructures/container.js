@@ -27,6 +27,7 @@ import ThreadRepositoryPostgre from "./repository/ThreadRepositoryPostgre.js";
 import PostThreadUseCase from "../Applications/use_case/thread/PostThreadUseCase.js";
 import CommentRepositoryPostgre from "./repository/CommentRepositoryPostgre.js";
 import PostCommentUseCase from "../Applications/use_case/comment/PostCommentUseCase.js";
+import DeleteCommentUseCase from "../Applications/use_case/comment/DeleteCommentUseCase.js";
 
 // creating container
 const container = createContainer();
@@ -204,6 +205,27 @@ container.register([
   {
     key: PostCommentUseCase.name,
     Class: PostCommentUseCase,
+    parameter: {
+      injectType: "destructuring",
+      dependencies: [
+        {
+          name: "commentRepository",
+          internal: CommentRepositoryPostgre.name,
+        },
+        {
+          name: "threadRepository",
+          internal: ThreadRepositoryPostgre.name,
+        },
+        {
+          name: "tokenManager",
+          internal: AuthenticationTokenManager.name,
+        },
+      ],
+    },
+  },
+  {
+    key: DeleteCommentUseCase.name,
+    Class: DeleteCommentUseCase,
     parameter: {
       injectType: "destructuring",
       dependencies: [
