@@ -92,6 +92,7 @@ describe("/comments endpoint", () => {
       });
 
       const commentResponseJSON = JSON.parse(commentResponse.payload);
+
       expect(commentResponse.statusCode).toEqual(400);
       expect(commentResponseJSON.status).toBe("fail");
       expect(commentResponseJSON.message).toBeDefined();

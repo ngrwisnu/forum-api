@@ -1,7 +1,7 @@
 import PostComment from "../../../Domains/comments/entities/PostComment.js";
+import JoiValidation from "../../../Infrastructures/validation/JoiValidation.js";
 import AuthenticationHandler from "../../helper/AuthenticationHandler.js";
 import CommentSchema from "../../validation/CommentSchema.js";
-import Validation from "../../validation/Validation.js";
 
 class PostCommentUseCase {
   constructor({ commentRepository, threadRepository, tokenManager }) {
@@ -18,7 +18,7 @@ class PostCommentUseCase {
 
     const user = await this._tokenManager.decodePayload(token);
 
-    const request = Validation.validate(CommentSchema.POST_COMMENT, payload);
+    const request = JoiValidation.validate(CommentSchema.POST_COMMENT, payload);
     request.user_id = user.id;
     request.thread_id = threadId;
     request.created_at = new Date().getTime();
