@@ -113,13 +113,10 @@ describe("CommentRepositoryPostgre", () => {
         pool,
         fakeIdGenerator
       );
-      commentRepositoryPostgre.deleteCommentById = jest
-        .fn()
-        .mockImplementation(() => Promise.reject("updating failed"));
 
       await expect(
-        commentRepositoryPostgre.deleteCommentById("comment-10")
-      ).rejects.toBe("updating failed");
+        commentRepositoryPostgre.deleteCommentById("comment-x")
+      ).rejects.toThrow();
     });
 
     it("should be able to update the is_deleted property", async () => {

@@ -48,8 +48,8 @@ class ReplyRepositoryPostgre extends ReplyRepository {
 
     const result = await this._pool.query(query);
 
-    if (!result) {
-      throw new InvariantError("Failed updating the reply");
+    if (!result.rowCount) {
+      throw new InvariantError("Failed deleting the reply");
     }
 
     return result.rowCount;

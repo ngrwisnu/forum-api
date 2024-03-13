@@ -1,6 +1,8 @@
 import ThreadRepository from "../../Domains/threads/ThreadRepository.js";
 import PostedThread from "../../Domains/threads/entities/PostedThread.js";
 import NotFoundError from "../../Commons/exceptions/NotFoundError.js";
+import IncludeComment from "../../Domains/comments/entities/IncludeComment.js";
+import IncludeReply from "../../Domains/replies/entities/IncludeReply.js";
 
 class ThreadRepositoryPostgre extends ThreadRepository {
   constructor(pool, idGenerator) {
@@ -33,15 +35,31 @@ class ThreadRepositoryPostgre extends ThreadRepository {
     result.rows[0].date = new Date(+result.rows[0].date);
 
     const commentsQuery = {
-      text: "SELECT comments.id, comments.content, comments.created_at as date, users.username FROM comments LEFT JOIN users ON users.id = comments.user_id WHERE comments.thread_id=$1 ORDER BY comments.created_at",
+      text: "SELECT comments.id, comments.content, comments.created_at as date, comments.is_deleted, users.username FROM comments LEFT JOIN users ON users.id = comments.user_id WHERE comments.thread_id=$1 ORDER BY comments.created_at",
       values: [id],
     };
 
+    const repliesQuery = {
+      text: "SELECT replies.id, replies.content, replies.created_at as date, replies.is_deleted, replies.comment_id, users.username FROM replies LEFT JOIN users ON users.id = replies.user_id ORDER BY replies.created_at",
+      values: [],
+    };
+
     const commentResult = await this._pool.query(commentsQuery);
-    const comments = commentResult.rows.map((row) => ({
-      ...row,
-      date: new Date(+row.date),
-    }));
+    const replyResult = await this._pool.query(repliesQuery);
+
+    const replies = replyResult.rows;
+    const comments = commentResult.rows.map((row) => {
+      const comment = new IncludeComment(row);
+      comment.replies = [];
+
+      for (let item of replies) {
+        if (item.comment_id === comment.id) {
+          comment.replies.push(new IncludeReply(item));
+        }
+      }
+
+      return comment;
+    });
 
     return {
       ...result.rows[0],

@@ -48,8 +48,8 @@ class CommentRepositoryPostgre extends CommentRepository {
 
     const result = await this._pool.query(query);
 
-    if (!result) {
-      throw new InvariantError("Failed updating the comment");
+    if (!result.rowCount) {
+      throw new InvariantError("Failed deleting the comment");
     }
 
     return result.rowCount;

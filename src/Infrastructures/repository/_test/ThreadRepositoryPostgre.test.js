@@ -1,4 +1,5 @@
 import CommentsTableTestHelper from "../../../../tests/CommentsTableTestHelper";
+import RepliesTableTestHelper from "../../../../tests/RepliesTableTestHelper";
 import ThreadsTableTestHelper from "../../../../tests/ThreadsTableTestHelper";
 import UsersTableTestHelper from "../../../../tests/UsersTableTestHelper";
 import PostThread from "../../../Domains/threads/entities/PostThread";
@@ -19,10 +20,15 @@ describe("ThreadRepositoryPostgre", () => {
   });
 
   afterAll(async () => {
+    await RepliesTableTestHelper.cleanTable();
+    await CommentsTableTestHelper.cleanTable();
     await ThreadsTableTestHelper.cleanTable();
     await UsersTableTestHelper.cleanTable();
     await pool.end();
   });
+
+  // afterAll(async () => {
+  // });
 
   describe("postThread", () => {
     it("should returns posted thread correctly", async () => {
@@ -72,29 +78,48 @@ describe("ThreadRepositoryPostgre", () => {
   });
 
   describe("getThreadById", () => {
-    beforeEach(async () => {
-      await CommentsTableTestHelper.addComment({
-        id: "comment-1",
-        content: "comment content",
-        user_id: "user-1",
-        thread_id: "thread-1",
-        created_at: new Date().getTime(),
-      });
-      await CommentsTableTestHelper.addComment({
-        id: "comment-2",
-        content: "comment content",
-        user_id: "user-1",
-        thread_id: "thread-1",
-        created_at: new Date().getTime() + 1000,
-      });
-    });
-
     afterEach(async () => {
       await CommentsTableTestHelper.cleanTable();
     });
 
-    it("should throw error when thread with specific id is not found", async () => {
-      try {
+    describe("without deleted comment", () => {
+      beforeEach(async () => {
+        await CommentsTableTestHelper.addComment({
+          id: "comment-1",
+          content: "comment content",
+          user_id: "user-1",
+          thread_id: "thread-1",
+          created_at: new Date().getTime(),
+        });
+        await CommentsTableTestHelper.addComment({
+          id: "comment-2",
+          content: "comment content",
+          user_id: "user-1",
+          thread_id: "thread-1",
+          created_at: new Date().getTime() + 1000,
+        });
+      });
+
+      afterEach(async () => {
+        await CommentsTableTestHelper.cleanTable();
+      });
+
+      it("should throw error when thread with specific id is not found", async () => {
+        try {
+          const fakeIdGenerator = () => "10";
+
+          const threadRepositoryPostgre = new ThreadRepositoryPostgre(
+            pool,
+            fakeIdGenerator
+          );
+
+          await threadRepositoryPostgre.getThreadById("thread-123");
+        } catch (error) {
+          expect(error).toBeDefined();
+        }
+      });
+
+      it("should return the object correctly when thread is found", async () => {
         const fakeIdGenerator = () => "10";
 
         const threadRepositoryPostgre = new ThreadRepositoryPostgre(
@@ -102,26 +127,100 @@ describe("ThreadRepositoryPostgre", () => {
           fakeIdGenerator
         );
 
-        await threadRepositoryPostgre.getThreadById("thread-123");
-      } catch (error) {
-        expect(error).toBeDefined();
-      }
+        const result = await threadRepositoryPostgre.getThreadById("thread-1");
+
+        expect(typeof result).toBe("object");
+        expect(result).toHaveProperty("username");
+        expect(result).toHaveProperty("date");
+        expect(result.comments).toBeDefined();
+      });
     });
 
-    it("should return the object correctly when thread is found", async () => {
-      const fakeIdGenerator = () => "10";
+    describe("with deleted comment", () => {
+      beforeEach(async () => {
+        await CommentsTableTestHelper.addComment({
+          id: "comment-3",
+          content: "comment content",
+          user_id: "user-1",
+          thread_id: "thread-1",
+          is_deleted: true,
+          created_at: new Date().getTime(),
+        });
+      });
 
-      const threadRepositoryPostgre = new ThreadRepositoryPostgre(
-        pool,
-        fakeIdGenerator
-      );
+      afterEach(async () => {
+        await CommentsTableTestHelper.cleanTable();
+      });
 
-      const result = await threadRepositoryPostgre.getThreadById("thread-1");
+      it("should return the object correctly", async () => {
+        const fakeIdGenerator = () => "10";
 
-      expect(typeof result).toBe("object");
-      expect(result).toHaveProperty("username");
-      expect(result).toHaveProperty("date");
-      expect(result.comments).toBeDefined();
+        const threadRepositoryPostgre = new ThreadRepositoryPostgre(
+          pool,
+          fakeIdGenerator
+        );
+
+        const result = await threadRepositoryPostgre.getThreadById("thread-1");
+
+        expect(typeof result).toBe("object");
+        expect(result).toHaveProperty("username");
+        expect(result).toHaveProperty("date");
+        expect(result.comments[0].content).toBe("**komentar telah dihapus**");
+      });
+    });
+
+    describe("with replies", () => {
+      beforeEach(async () => {
+        await CommentsTableTestHelper.addComment({
+          id: "comment-1",
+          content: "comment content",
+          user_id: "user-1",
+          thread_id: "thread-1",
+          created_at: new Date().getTime(),
+        });
+        await CommentsTableTestHelper.addComment({
+          id: "comment-2",
+          content: "comment content",
+          user_id: "user-1",
+          thread_id: "thread-1",
+          created_at: new Date().getTime(),
+        });
+        await RepliesTableTestHelper.addReply({
+          id: "reply-1",
+          user_id: "user-1",
+          comment_id: "comment-1",
+          created_at: new Date().getTime(),
+        });
+        await RepliesTableTestHelper.addReply({
+          id: "reply-2",
+          user_id: "user-1",
+          comment_id: "comment-2",
+          created_at: new Date().getTime(),
+        });
+      });
+
+      afterEach(async () => {
+        await RepliesTableTestHelper.cleanTable();
+        await CommentsTableTestHelper.cleanTable();
+      });
+
+      it("should return the object correctly with comments and replies property", async () => {
+        const fakeIdGenerator = () => "10";
+
+        const threadRepositoryPostgre = new ThreadRepositoryPostgre(
+          pool,
+          fakeIdGenerator
+        );
+
+        const result = await threadRepositoryPostgre.getThreadById("thread-1");
+
+        expect(typeof result).toBe("object");
+        expect(result).toHaveProperty("username");
+        expect(result).toHaveProperty("date");
+        expect(result.comments).toBeDefined();
+        expect(result.comments[0].replies).toBeDefined();
+        expect(result.comments[0].replies.length).toBe(1);
+      });
     });
   });
 
