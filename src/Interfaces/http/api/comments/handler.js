@@ -1,7 +1,7 @@
 import DeleteCommentUseCase from "../../../../Applications/use_case/comment/DeleteCommentUseCase.js";
 import PostCommentUseCase from "../../../../Applications/use_case/comment/PostCommentUseCase.js";
 
-class CommentHandler {
+class CommentsHandler {
   constructor(container) {
     this._container = container;
 
@@ -49,4 +49,4 @@ class CommentHandler {
   }
 }
 
-export default CommentHandler;
+export default CommentsHandler;

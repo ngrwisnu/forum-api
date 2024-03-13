@@ -35,11 +35,11 @@
 
 ### Add Reply to a Comment **(OPTIONAL)**
 
-- [ ] Returns `error` when token is not provided
-- [ ] Returns `error` when the _thread_ or _comment_ is not found
-- [ ] Returns `error` when content is not provided
-- [ ] Returns `error` when payload data type is invalid
-- [ ] Returns `succeed` when success add new reply
+- [x] Returns `error` when token is not provided
+- [x] Returns `error` when the _thread_ or _comment_ is not found
+- [x] Returns `error` when content is not provided
+- [x] Returns `error` when payload data type is invalid
+- [x] Returns `succeed` when success add new reply
 
 ---
 
