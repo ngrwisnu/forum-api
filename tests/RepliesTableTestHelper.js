@@ -10,7 +10,7 @@ const RepliesTableTestHelper = {
     created_at = 1710039703717,
   }) {
     const query = {
-      text: "INSERT INTO comments (id, content, user_id, comment_id, created_at) VALUES($1, $2, $3, $4, $5)",
+      text: "INSERT INTO replies (id, content, user_id, comment_id, created_at) VALUES($1, $2, $3, $4, $5)",
       values: [id, content, user_id, comment_id, created_at],
     };
 

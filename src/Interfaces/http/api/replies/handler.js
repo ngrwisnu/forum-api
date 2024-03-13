@@ -1,3 +1,4 @@
+import DeleteReplyUseCase from "../../../../Applications/use_case/reply/DeleteReplyUseCase.js";
 import PostReplyUseCase from "../../../../Applications/use_case/reply/PostReplyUseCase.js";
 
 class RepliesHandler {
@@ -5,7 +6,7 @@ class RepliesHandler {
     this._container = container;
 
     this.postReplyHandler = this.postReplyHandler.bind(this);
-    // this.deleteCommentHandler = this.deleteCommentHandler.bind(this);
+    this.deleteReplyHandler = this.deleteReplyHandler.bind(this);
   }
 
   async postReplyHandler(request, h) {
@@ -32,15 +33,22 @@ class RepliesHandler {
     return response;
   }
 
-  async deleteCommentHandler(request, h) {
+  async deleteReplyHandler(request, h) {
     const token = request.headers.authorization;
-    const { threadId, commentId } = request.params;
+    const { threadId, commentId, replyId } = request.params;
 
-    const deleteCommentUseCase = this._container.getInstance(
-      DeleteCommentUseCase.name
+    const deleteReplyUseCase = this._container.getInstance(
+      DeleteReplyUseCase.name
     );
 
-    await deleteCommentUseCase.execute(token, threadId, commentId);
+    const params = {
+      token,
+      threadId,
+      commentId,
+      replyId,
+    };
+
+    await deleteReplyUseCase.execute(params);
 
     const response = h.response({
       status: "success",

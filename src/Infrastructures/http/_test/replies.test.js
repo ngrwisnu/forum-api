@@ -256,7 +256,7 @@ describe("/replies endpoint", () => {
     });
   });
 
-  describe.skip("DELETE /threads/{threadId}/comments/{commentId}", () => {
+  describe("DELETE /threads/{threadId}/comments/{commentId}/replies/{replyId}", () => {
     beforeEach(async () => {
       const server = await createServer(container);
 
@@ -269,21 +269,23 @@ describe("/replies endpoint", () => {
           fullname: "stewie griffin",
         },
       });
+
+      await RepliesTableTestHelper.addReply({});
     });
 
     it("should return response 401 when token is not provided", async () => {
       const server = await createServer(container);
 
-      const commentResponse = await server.inject({
+      const replyResponse = await server.inject({
         method: "DELETE",
-        url: "/threads/thread-1/comments/comment-1",
+        url: "/threads/thread-1/comments/comment-1/replies/reply-1",
         headers: {},
       });
 
-      const commentResponseJSON = JSON.parse(commentResponse.payload);
-      expect(commentResponse.statusCode).toEqual(401);
-      expect(commentResponseJSON.status).toBe("fail");
-      expect(commentResponseJSON.message).toBeDefined();
+      const replyResponseJSON = JSON.parse(replyResponse.payload);
+      expect(replyResponse.statusCode).toEqual(401);
+      expect(replyResponseJSON.status).toBe("fail");
+      expect(replyResponseJSON.message).toBeDefined();
     });
 
     it("should return response 403 when user is unauthorized", async () => {
@@ -306,25 +308,18 @@ describe("/replies endpoint", () => {
         authResponseJSON.data.refreshToken
       );
 
-      // * create comment
-      await CommentsTableTestHelper.addComment({
-        user_id: "user-1",
-        thread_id: "thread-1",
-      });
-
-      const commentResponse = await server.inject({
+      const replyResponse = await server.inject({
         method: "DELETE",
-        url: "/threads/thread-1/comments/comment-1",
+        url: "/threads/thread-1/comments/comment-1/replies/reply-1",
         headers: {
           authorization: `Bearer ${token[0].token}`,
         },
       });
 
-      const commentResponseJSON = JSON.parse(commentResponse.payload);
-
-      expect(commentResponse.statusCode).toBe(403);
-      expect(commentResponseJSON.status).toBe("fail");
-      expect(typeof commentResponseJSON.message).toBe("string");
+      const replyResponseJSON = JSON.parse(replyResponse.payload);
+      expect(replyResponse.statusCode).toBe(403);
+      expect(replyResponseJSON.status).toBe("fail");
+      expect(typeof replyResponseJSON.message).toBe("string");
     });
 
     it("should return response 404 when thread is not found", async () => {
@@ -346,30 +341,20 @@ describe("/replies endpoint", () => {
       const token = await AuthenticationsTableTestHelper.findToken(
         authResponseJSON.data.refreshToken
       );
-      const tokenManager = container.getInstance(
-        AuthenticationTokenManager.name
-      );
-      const user = await tokenManager.decodePayload(token[0].token);
 
-      // * create comment
-      await CommentsTableTestHelper.addComment({
-        user_id: user.id,
-        thread_id: "thread-1",
-      });
-
-      const commentResponse = await server.inject({
+      const replyResponse = await server.inject({
         method: "DELETE",
-        url: "/threads/thread-100/comments/comment-1",
+        url: "/threads/thread-x/comments/comment-1/replies/reply-1",
         headers: {
           authorization: `Bearer ${token[0].token}`,
         },
       });
 
-      const commentResponseJSON = JSON.parse(commentResponse.payload);
+      const replyResponseJSON = JSON.parse(replyResponse.payload);
 
-      expect(commentResponse.statusCode).toBe(404);
-      expect(commentResponseJSON.status).toBe("fail");
-      expect(typeof commentResponseJSON.message).toBe("string");
+      expect(replyResponse.statusCode).toBe(404);
+      expect(replyResponseJSON.status).toBe("fail");
+      expect(typeof replyResponseJSON.message).toBe("string");
     });
 
     it("should return response 404 when comment is not found", async () => {
@@ -391,30 +376,55 @@ describe("/replies endpoint", () => {
       const token = await AuthenticationsTableTestHelper.findToken(
         authResponseJSON.data.refreshToken
       );
-      const tokenManager = container.getInstance(
-        AuthenticationTokenManager.name
-      );
-      const user = await tokenManager.decodePayload(token[0].token);
 
-      // * create comment
-      await CommentsTableTestHelper.addComment({
-        user_id: user.id,
-        thread_id: "thread-1",
-      });
-
-      const commentResponse = await server.inject({
+      const replyResponse = await server.inject({
         method: "DELETE",
-        url: "/threads/thread-1/comments/comment-100",
+        url: "/threads/thread-1/comments/comment-x/replies/reply-1",
         headers: {
           authorization: `Bearer ${token[0].token}`,
         },
       });
 
-      const commentResponseJSON = JSON.parse(commentResponse.payload);
+      const replyResponseJSON = JSON.parse(replyResponse.payload);
 
-      expect(commentResponse.statusCode).toBe(404);
-      expect(commentResponseJSON.status).toBe("fail");
-      expect(typeof commentResponseJSON.message).toBe("string");
+      expect(replyResponse.statusCode).toBe(404);
+      expect(replyResponseJSON.status).toBe("fail");
+      expect(typeof replyResponseJSON.message).toBe("string");
+    });
+
+    it("should return response 404 when reply is not found", async () => {
+      const server = await createServer(container);
+
+      // * login
+      const authResponse = await server.inject({
+        method: "POST",
+        url: "/authentications",
+        payload: {
+          username: "stewie",
+          password: "secret",
+        },
+      });
+
+      const authResponseJSON = JSON.parse(authResponse.payload);
+
+      // * get token
+      const token = await AuthenticationsTableTestHelper.findToken(
+        authResponseJSON.data.refreshToken
+      );
+
+      const replyResponse = await server.inject({
+        method: "DELETE",
+        url: "/threads/thread-1/comments/comment-1/replies/reply-x",
+        headers: {
+          authorization: `Bearer ${token[0].token}`,
+        },
+      });
+
+      const replyResponseJSON = JSON.parse(replyResponse.payload);
+
+      expect(replyResponse.statusCode).toBe(404);
+      expect(replyResponseJSON.status).toBe("fail");
+      expect(typeof replyResponseJSON.message).toBe("string");
     });
 
     it("should return response 200 when succeed", async () => {
@@ -441,24 +451,23 @@ describe("/replies endpoint", () => {
       );
       const user = await tokenManager.decodePayload(token[0].token);
 
-      // * create comment
-      await CommentsTableTestHelper.addComment({
+      await RepliesTableTestHelper.addReply({
+        id: "reply-2",
         user_id: user.id,
-        thread_id: "thread-1",
       });
 
-      const commentResponse = await server.inject({
+      const replyResponse = await server.inject({
         method: "DELETE",
-        url: "/threads/thread-1/comments/comment-1",
+        url: "/threads/thread-1/comments/comment-1/replies/reply-2",
         headers: {
           authorization: `Bearer ${token[0].token}`,
         },
       });
 
-      const commentResponseJSON = JSON.parse(commentResponse.payload);
+      const replyResponseJSON = JSON.parse(replyResponse.payload);
 
-      expect(commentResponse.statusCode).toBe(200);
-      expect(commentResponseJSON.status).toBe("success");
+      expect(replyResponse.statusCode).toBe(200);
+      expect(replyResponseJSON.status).toBe("success");
     });
   });
 });

@@ -1,27 +1,34 @@
 import AuthenticationHandler from "../../helper/AuthenticationHandler.js";
 import AuthorizationHandler from "../../helper/AuthorizationHandler.js";
 
-class DeleteCommentUseCase {
-  constructor({ commentRepository, threadRepository, tokenManager }) {
+class DeleteReplyUseCase {
+  constructor({
+    replyRepository,
+    commentRepository,
+    threadRepository,
+    tokenManager,
+  }) {
+    this._replyRepository = replyRepository;
     this._commentRepository = commentRepository;
     this._threadRepository = threadRepository;
     this._tokenManager = tokenManager;
   }
 
-  async execute(token, threadId, commentId) {
+  async execute({ token, threadId, commentId, replyId }) {
     await AuthenticationHandler.isAuthenticationTokenExist(token);
     token = AuthenticationHandler.purgeBearerOfToken(token);
 
     await this._commentRepository.isCommentExist(commentId);
     await this._threadRepository.isThreadExist(threadId);
+    await this._replyRepository.isReplyExist(replyId);
 
     const user = await this._tokenManager.decodePayload(token);
-    const comment = await this._commentRepository.getCommentById(commentId);
+    const reply = await this._replyRepository.getReplyById(replyId);
 
-    await AuthorizationHandler.isAuthorized(comment.user_id, user.id);
+    await AuthorizationHandler.isAuthorized(reply.user_id, user.id);
 
-    return this._commentRepository.deleteCommentById(commentId);
+    return this._replyRepository.deleteReplyById(replyId);
   }
 }
 
-export default DeleteCommentUseCase;
+export default DeleteReplyUseCase;

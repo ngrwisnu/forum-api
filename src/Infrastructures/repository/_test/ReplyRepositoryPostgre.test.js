@@ -1,13 +1,12 @@
 import ThreadsTableTestHelper from "../../../../tests/ThreadsTableTestHelper";
 import UsersTableTestHelper from "../../../../tests/UsersTableTestHelper";
 import pool from "../../database/postgres/pool";
-import CommentRepositoryPostgre from "../CommentRepositoryPostgre";
 import CommentsTableTestHelper from "../../../../tests/CommentsTableTestHelper";
 import RepliesTableTestHelper from "../../../../tests/RepliesTableTestHelper";
-import GetComment from "../../../Domains/comments/entities/GetComment";
 import PostReply from "../../../Domains/replies/entities/PostReply";
 import ReplyRepositoryPostgre from "../ReplyRepositoryPostgre";
 import PostedReply from "../../../Domains/replies/entities/PostedReply";
+import GetReply from "../../../Domains/replies/entities/GetReply";
 
 describe("ReplyRepositoryPostgre", () => {
   beforeAll(async () => {
@@ -22,6 +21,7 @@ describe("ReplyRepositoryPostgre", () => {
     });
     await ThreadsTableTestHelper.addThread({
       id: "thread-1",
+      user_id: "user-2",
     });
     await CommentsTableTestHelper.addComment({
       id: "comment-1",
@@ -39,7 +39,7 @@ describe("ReplyRepositoryPostgre", () => {
   });
 
   describe("postReply", () => {
-    it("should returns posted thread correctly", async () => {
+    it("should returns posted reply object correctly", async () => {
       const payload = {
         content: "reply content",
       };
@@ -81,80 +81,74 @@ describe("ReplyRepositoryPostgre", () => {
     });
   });
 
-  describe.skip("getCommentById", () => {
-    it("should return 404 when comment is not found", async () => {
+  describe("getReplyById", () => {
+    it("should return 404 when reply is not found", async () => {
       const fakeIdGenerator = () => "10";
 
-      const commentRepositoryPostgre = new CommentRepositoryPostgre(
+      const replyRepositoryPostgre = new ReplyRepositoryPostgre(
         pool,
         fakeIdGenerator
       );
 
-      expect(
-        commentRepositoryPostgre.getCommentById("comment-1")
-      ).rejects.toThrow();
+      expect(replyRepositoryPostgre.getReplyById("reply-x")).rejects.toThrow();
     });
 
-    it("should return the correct object when comment is found", async () => {
+    it("should return the correct object when reply is found", async () => {
       const fakeIdGenerator = () => "10";
 
-      const commentRepositoryPostgre = new CommentRepositoryPostgre(
+      const replyRepositoryPostgre = new ReplyRepositoryPostgre(
         pool,
         fakeIdGenerator
       );
 
-      const result = await commentRepositoryPostgre.getCommentById(
-        "comment-10"
-      );
+      const result = await replyRepositoryPostgre.getReplyById("reply-1");
 
-      expect(result).toStrictEqual(new GetComment(result));
+      expect(result).toStrictEqual(new GetReply(result));
     });
   });
 
-  describe.skip("deleteCommentById", () => {
-    it("should return error when updating process failed", async () => {
+  describe("deleteReplyById", () => {
+    it("should return error when deleting process failed", async () => {
       const fakeIdGenerator = () => "10";
 
-      const commentRepositoryPostgre = new CommentRepositoryPostgre(
+      const replyRepositoryPostgre = new ReplyRepositoryPostgre(
         pool,
         fakeIdGenerator
       );
-      commentRepositoryPostgre.deleteCommentById = jest
+      replyRepositoryPostgre.deleteReplyById = jest
         .fn()
-        .mockImplementation(() => Promise.reject("updating failed"));
+        .mockImplementation(() => Promise.reject("deleting failed"));
 
       await expect(
-        commentRepositoryPostgre.deleteCommentById("comment-10")
-      ).rejects.toBe("updating failed");
+        replyRepositoryPostgre.deleteReplyById("reply-10")
+      ).rejects.toBe("deleting failed");
     });
 
     it("should be able to update the is_deleted property", async () => {
       const fakeIdGenerator = () => "10";
 
-      const commentRepositoryPostgre = new CommentRepositoryPostgre(
+      const replyRepositoryPostgre = new ReplyRepositoryPostgre(
         pool,
         fakeIdGenerator
       );
 
-      const result = await commentRepositoryPostgre.deleteCommentById(
-        "comment-10"
-      );
+      const result = await replyRepositoryPostgre.deleteReplyById("reply-1");
 
       expect(result).toBe(1);
     });
   });
 
-  describe.skip("isCommentExist", () => {
-    it("should return 404 when comment does not exist", async () => {
+  describe("isReplyExist", () => {
+    it("should return 404 when reply does not exist", async () => {
       const fakeIdGenerator = () => "10";
 
-      const commentRepositoryPostgre = new CommentRepositoryPostgre(
+      const replyRepositoryPostgre = new ReplyRepositoryPostgre(
         pool,
         fakeIdGenerator
       );
 
       expect(
-        commentRepositoryPostgre.isCommentExist("comment-1")
+        replyRepositoryPostgre.isReplyExist("comment-x")
       ).rejects.toThrow();
     });
   });

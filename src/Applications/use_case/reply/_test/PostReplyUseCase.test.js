@@ -79,7 +79,7 @@ describe("PostReplyUseCase", () => {
     expect(postReplyUseCase.execute(params)).rejects.toBe("thread not found");
   });
 
-  it("should orchestrate the post comment action correctly", async () => {
+  it("should orchestrate the post reply action correctly", async () => {
     const payload = {
       content: "reply content",
     };
