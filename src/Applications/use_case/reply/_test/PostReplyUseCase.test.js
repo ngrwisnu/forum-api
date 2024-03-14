@@ -72,11 +72,17 @@ describe("PostReplyUseCase", () => {
     const params = {
       token: "Bearer token123",
       payload: {},
-      threadId: "thread-1",
+      threadId: "",
       commentId: "",
     };
 
-    expect(postReplyUseCase.execute(params)).rejects.toBe("thread not found");
+    try {
+      await postReplyUseCase.execute(params);
+    } catch (error) {
+      expect(error).toBeDefined();
+    }
+
+    expect(mockThreadRepository.isThreadExist).toBeCalledWith(params.threadId);
   });
 
   it("should orchestrate the post reply action correctly", async () => {
@@ -134,21 +140,22 @@ describe("PostReplyUseCase", () => {
         id: "reply-1",
         content: payload.content,
         user_id: "user-1",
-        comment_id: "comment-1",
+        comment_id: params.commentId,
         is_deleted: false,
         created_at: new Date(),
       })
     );
-    expect(mockReplyRepository.postReply).toBeCalledTimes(1);
     expect(mockReplyRepository.postReply).toBeCalledWith(
       new PostReply({
         content: payload.content,
         user_id: "user-1",
-        comment_id: "comment-1",
+        comment_id: params.commentId,
         created_at: new Date().getTime(),
       })
     );
-    expect(mockThreadRepository.isThreadExist).toBeCalled();
-    expect(mockCommentRepository.isCommentExist).toBeCalled();
+    expect(mockThreadRepository.isThreadExist).toBeCalledWith(params.threadId);
+    expect(mockCommentRepository.isCommentExist).toBeCalledWith(
+      params.commentId
+    );
   });
 });

@@ -12,10 +12,12 @@ describe("GetThreadByIdUseCase", () => {
       threadRepository: mockThreadRepository,
     });
 
-    expect(mockGetThreadUseCase.execute("thread-x")).rejects.toBe(
-      "thread not found"
-    );
-    expect(mockThreadRepository.isThreadExist).toBeCalledTimes(1);
+    try {
+      await mockGetThreadUseCase.execute("thread-x");
+    } catch (error) {
+      expect(error).toBeDefined();
+    }
+
     expect(mockThreadRepository.isThreadExist).toBeCalledWith("thread-x");
   });
 
@@ -24,17 +26,20 @@ describe("GetThreadByIdUseCase", () => {
     mockThreadRepository.isThreadExist = jest
       .fn()
       .mockImplementation(() => Promise.resolve());
+    mockThreadRepository.getThreadById = jest
+      .fn()
+      .mockImplementation(() => Promise.resolve({ id: "thread-1" }));
 
     const mockGetThreadUseCase = new GetThreadByIdUseCase({
       threadRepository: mockThreadRepository,
     });
-    mockGetThreadUseCase.execute = jest
-      .fn()
-      .mockImplementation(() => Promise.resolve({ id: "thread-1" }));
 
-    expect(mockGetThreadUseCase.execute("thread-1")).resolves.toStrictEqual({
+    const result = await mockGetThreadUseCase.execute("thread-1");
+
+    expect(result).toStrictEqual({
       id: "thread-1",
     });
-    expect(mockGetThreadUseCase.execute).toBeCalledWith("thread-1");
+    expect(mockThreadRepository.isThreadExist).toBeCalledWith("thread-1");
+    expect(mockThreadRepository.getThreadById).toBeCalledWith("thread-1");
   });
 });

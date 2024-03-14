@@ -40,9 +40,14 @@ describe("DeleteReplyUseCase", () => {
       replyId: "",
     };
 
-    expect(deleteReplyUseCase.execute(params)).rejects.toBe(
-      "comment not found"
-    );
+    try {
+      await deleteReplyUseCase.execute(params);
+    } catch (error) {
+      expect(error).toBe("comment not found");
+    }
+
+    expect(mockCommentRepository.isCommentExist).toBeCalledTimes(1);
+    expect(mockCommentRepository.isCommentExist).toBeCalledWith("comment-x");
   });
 
   it("should return error when thread is not found", async () => {
@@ -64,12 +69,20 @@ describe("DeleteReplyUseCase", () => {
 
     const params = {
       token: "Bearer token123",
-      commentId: "",
+      commentId: "comment-1",
       threadId: "thread-x",
       replyId: "",
     };
 
-    expect(deleteReplyUseCase.execute(params)).rejects.toBe("thread not found");
+    try {
+      await deleteReplyUseCase.execute(params);
+    } catch (error) {
+      expect(error).toBe("thread not found");
+    }
+
+    expect(mockCommentRepository.isCommentExist).toBeCalledTimes(1);
+    expect(mockCommentRepository.isCommentExist).toBeCalledWith("comment-1");
+    expect(mockThreadRepository.isThreadExist).toBeCalledWith("thread-x");
   });
 
   it("should return error when user is unauthorized", async () => {
@@ -85,9 +98,6 @@ describe("DeleteReplyUseCase", () => {
     mockCommentRepository.isCommentExist = jest
       .fn()
       .mockImplementation(() => Promise.resolve());
-    mockCommentRepository.getCommentById = jest
-      .fn()
-      .mockImplementation(() => Promise.resolve({ user_id: "user-1" }));
     mockJwtTokenManager.decodePayload = jest
       .fn()
       .mockImplementation(() => Promise.resolve({ id: "user-x" }));
@@ -109,7 +119,16 @@ describe("DeleteReplyUseCase", () => {
       replyId: "reply-1",
     };
 
-    expect(deleteReplyUseCase.execute(params)).rejects.toThrow();
+    try {
+      await deleteReplyUseCase.execute(params);
+    } catch (error) {
+      expect(error).toBeDefined();
+    }
+
+    expect(mockCommentRepository.isCommentExist).toBeCalledWith("comment-1");
+    expect(mockThreadRepository.isThreadExist).toBeCalledWith("thread-1");
+    expect(mockReplyRepository.isReplyExist).toBeCalledWith("reply-1");
+    expect(mockJwtTokenManager.decodePayload).toBeCalledWith("token123");
   });
 
   it("should orchestrate the delete reply action correctly", async () => {
@@ -156,12 +175,9 @@ describe("DeleteReplyUseCase", () => {
 
     await deleteReplyUseCase.execute(params);
 
-    expect(mockCommentRepository.isCommentExist).toBeCalledTimes(1);
     expect(mockCommentRepository.isCommentExist).toBeCalledWith("comment-1");
-    expect(mockThreadRepository.isThreadExist).toBeCalled();
     expect(mockThreadRepository.isThreadExist).toBeCalledWith("thread-1");
-    expect(mockJwtTokenManager.decodePayload).toBeCalledTimes(1);
-    expect(mockReplyRepository.isReplyExist).toBeCalledTimes(1);
+    expect(mockJwtTokenManager.decodePayload).toBeCalledWith("token123");
     expect(mockReplyRepository.isReplyExist).toBeCalledWith("reply-1");
   });
 });

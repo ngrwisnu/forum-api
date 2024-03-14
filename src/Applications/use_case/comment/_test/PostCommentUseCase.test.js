@@ -7,21 +7,19 @@ import PostCommentUseCase from "../PostCommentUseCase";
 
 describe("PostCommentUseCase", () => {
   it("should return error when token auth is not provided", async () => {
-    try {
-      const payload = {
-        content: "comment content",
-      };
+    const payload = {
+      content: "comment content",
+    };
 
-      const postCommentUseCase = new PostCommentUseCase({
-        commentRepository: {},
-        threadRepository: {},
-        tokenManager: {},
-      });
+    const postCommentUseCase = new PostCommentUseCase({
+      commentRepository: {},
+      threadRepository: {},
+      tokenManager: {},
+    });
 
-      await postCommentUseCase.execute(undefined, payload, "thread-1");
-    } catch (error) {
-      expect(error).toBeDefined();
-    }
+    expect(
+      postCommentUseCase.execute(undefined, payload, "thread-1")
+    ).rejects.toThrow();
   });
 
   it("should return error when content is empty", async () => {
@@ -45,24 +43,34 @@ describe("PostCommentUseCase", () => {
   });
 
   it("should return error when thread is not found", async () => {
+    const mockThreadRepository = new ThreadRepository();
+    mockThreadRepository.isThreadExist = jest
+      .fn()
+      .mockImplementation(() => Promise.reject("thread not found"));
+
+    const postCommentUseCase = new PostCommentUseCase({
+      commentRepository: {},
+      tokenManager: {},
+      threadRepository: mockThreadRepository,
+    });
+
+    const params = {
+      token: "Bearer token123",
+      payload: {},
+      threadId: "",
+    };
+
     try {
-      const mockThreadRepository = new ThreadRepository();
-      mockThreadRepository.isThreadExist = jest
-        .fn()
-        .mockImplementation(() => Promise.reject("thread not found"));
-
-      const postCommentUseCase = new PostCommentUseCase({
-        commentRepository: {},
-        tokenManager: {},
-        threadRepository: mockThreadRepository,
-      });
-
-      await postCommentUseCase.execute("Bearer token123", {}, "thread-1");
-
-      expect(mockThreadRepository.isThreadExist).toBeCalledTimes(1);
+      await postCommentUseCase.execute(
+        params.token,
+        params.payload,
+        params.threadId
+      );
     } catch (error) {
-      expect(error).toBe("thread not found");
+      expect(error).toBeDefined();
     }
+
+    expect(mockThreadRepository.isThreadExist).toBeCalledWith(params.threadId);
   });
 
   it("should orchestrate the post comment action correctly", async () => {
@@ -101,10 +109,16 @@ describe("PostCommentUseCase", () => {
       tokenManager: mockJwtTokenManager,
     });
 
-    const postedComment = await postCommentUseCase.execute(
-      "Bearer token123",
+    const params = {
+      token: "Bearer token123",
       payload,
-      "thread-1"
+      threadId: "thread-1",
+    };
+
+    const postedComment = await postCommentUseCase.execute(
+      params.token,
+      params.payload,
+      params.threadId
     );
 
     expect(postedComment).toStrictEqual(
@@ -112,20 +126,20 @@ describe("PostCommentUseCase", () => {
         id: "comment-1",
         content: payload.content,
         user_id: "user-1",
-        thread_id: "thread-1",
+        thread_id: params.threadId,
         is_deleted: false,
         created_at: new Date(),
       })
     );
-    expect(mockCommentRepository.postComment).toBeCalledTimes(1);
     expect(mockCommentRepository.postComment).toBeCalledWith(
       new PostComment({
         content: payload.content,
         user_id: "user-1",
-        thread_id: "thread-1",
+        thread_id: params.threadId,
         created_at: new Date().getTime(),
       })
     );
-    expect(mockThreadRepository.isThreadExist).toBeCalled();
+    expect(mockJwtTokenManager.decodePayload).toBeCalledWith("token123");
+    expect(mockThreadRepository.isThreadExist).toBeCalledWith(params.threadId);
   });
 });

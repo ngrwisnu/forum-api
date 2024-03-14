@@ -139,7 +139,7 @@ describe("PostThreadUseCase", () => {
         created_at: new Date(),
       })
     );
-    expect(mockThreadRepository.postThread).toBeCalledTimes(1);
+    expect(mockJwtTokenManager.decodePayload).toBeCalledWith("token123");
     expect(mockThreadRepository.postThread).toBeCalledWith(
       new PostThread({
         title: payload.title,
