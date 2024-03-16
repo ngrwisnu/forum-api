@@ -67,6 +67,16 @@ class ReplyRepositoryPostgre extends ReplyRepository {
       throw new NotFoundError("Reply not found!");
     }
   }
+
+  async repliesDetails() {
+    const query = {
+      text: "SELECT replies.id, replies.content, replies.created_at as date, replies.is_deleted, replies.comment_id, users.username FROM replies LEFT JOIN users ON users.id = replies.user_id ORDER BY replies.created_at",
+    };
+
+    const result = await this._pool.query(query);
+
+    return result.rows;
+  }
 }
 
 export default ReplyRepositoryPostgre;

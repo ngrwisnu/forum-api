@@ -67,6 +67,17 @@ class CommentRepositoryPostgre extends CommentRepository {
       throw new NotFoundError("Comment not found!");
     }
   }
+
+  async threadsCommentsDetails(threadId) {
+    const query = {
+      text: "SELECT comments.id, comments.content, comments.created_at as date, comments.is_deleted, users.username FROM comments LEFT JOIN users ON users.id = comments.user_id WHERE comments.thread_id=$1 ORDER BY comments.created_at",
+      values: [threadId],
+    };
+
+    const result = await this._pool.query(query);
+
+    return result.rows;
+  }
 }
 
 export default CommentRepositoryPostgre;

@@ -1,4 +1,4 @@
-import Validation from "../../Applications/validation/Validation.js";
+import Validation from "./Validation.js";
 import InvariantError from "../../Commons/exceptions/InvariantError.js";
 
 class JoiValidation extends Validation {

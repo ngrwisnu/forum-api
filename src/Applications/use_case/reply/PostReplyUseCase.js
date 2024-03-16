@@ -1,5 +1,5 @@
 import PostReply from "../../../Domains/replies/entities/PostReply.js";
-import JoiValidation from "../../../Infrastructures/validation/JoiValidation.js";
+import JoiValidation from "../../validation/JoiValidation.js";
 import AuthenticationHandler from "../../helper/AuthenticationHandler.js";
 import ReplySchema from "../../validation/ReplySchema.js";
 

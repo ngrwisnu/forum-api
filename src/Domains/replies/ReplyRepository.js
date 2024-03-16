@@ -14,6 +14,10 @@ class ReplyRepository {
   async isReplyExist(id) {
     throw new Error("REPLY_REPOSITORY.METHOD_NOT_IMPLEMENTED");
   }
+
+  async repliesDetails() {
+    throw new Error("REPLY_REPOSITORY.METHOD_NOT_IMPLEMENTED");
+  }
 }
 
 export default ReplyRepository;

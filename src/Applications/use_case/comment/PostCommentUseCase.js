@@ -1,5 +1,5 @@
 import PostComment from "../../../Domains/comments/entities/PostComment.js";
-import JoiValidation from "../../../Infrastructures/validation/JoiValidation.js";
+import JoiValidation from "../../validation/JoiValidation.js";
 import AuthenticationHandler from "../../helper/AuthenticationHandler.js";
 import CommentSchema from "../../validation/CommentSchema.js";
 
