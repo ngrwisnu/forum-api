@@ -1,4 +1,4 @@
-import GetThread from "../getThread";
+import GetThread from "../GetThread";
 
 describe("GetThread entity", () => {
   it("should creates the correct object", async () => {

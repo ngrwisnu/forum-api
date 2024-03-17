@@ -1,5 +1,4 @@
-import IncludeComment from "../../../Domains/comments/entities/IncludeComment.js";
-import IncludeReply from "../../../Domains/replies/entities/IncludeReply.js";
+import ThreadDetails from "../../../Domains/threads/entities/ThreadDetails.js";
 
 class GetThreadByIdUseCase {
   constructor({ threadRepository, commentRepository, replyRepository }) {
@@ -17,23 +16,7 @@ class GetThreadByIdUseCase {
     );
     const replies = await this._replyRepository.repliesDetails();
 
-    const commentsDetails = comments.map((row) => {
-      const comment = new IncludeComment(row);
-      comment.replies = [];
-
-      for (let reply of replies) {
-        if (reply.comment_id === comment.id) {
-          comment.replies.push(new IncludeReply(reply));
-        }
-      }
-
-      return comment;
-    });
-
-    return {
-      ...thread,
-      comments: commentsDetails,
-    };
+    return new ThreadDetails(thread, comments, replies);
   }
 }
 
