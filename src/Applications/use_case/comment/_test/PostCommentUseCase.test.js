@@ -6,30 +6,35 @@ import JwtTokenManager from "../../../../Infrastructures/security/JwtTokenManage
 import PostCommentUseCase from "../PostCommentUseCase";
 
 describe("PostCommentUseCase", () => {
-  it("should return error when token auth is not provided", async () => {
-    const payload = {
-      content: "comment content",
-    };
-
-    const postCommentUseCase = new PostCommentUseCase({
-      commentRepository: {},
-      threadRepository: {},
-      tokenManager: {},
-    });
-
-    expect(
-      postCommentUseCase.execute(undefined, payload, "thread-1")
-    ).rejects.toThrow();
-  });
-
   it("should return error when content is empty", async () => {
     const payload = {
       content: "",
     };
 
-    const postCommentUseCase = new PostCommentUseCase({});
+    const mockThreadRepository = new ThreadRepository();
+    mockThreadRepository.isThreadExist = jest
+      .fn()
+      .mockImplementation(() => Promise.resolve());
 
-    expect(postCommentUseCase.execute("", payload, "")).rejects.toThrowError();
+    const mockJwtTokenManager = new JwtTokenManager();
+    mockJwtTokenManager.decodePayload = jest
+      .fn()
+      .mockImplementation(() => Promise.resolve());
+
+    const postCommentUseCase = new PostCommentUseCase({
+      commentRepository: {},
+      threadRepository: mockThreadRepository,
+      tokenManager: mockJwtTokenManager,
+    });
+
+    try {
+      await postCommentUseCase.execute("", payload, "");
+    } catch (error) {
+      expect(error.name).toBe("InvariantError");
+    }
+
+    expect(mockThreadRepository.isThreadExist).toBeCalledTimes(1);
+    expect(mockJwtTokenManager.decodePayload).toBeCalledTimes(1);
   });
 
   it("should return error when content has invalid data type", async () => {
@@ -37,9 +42,30 @@ describe("PostCommentUseCase", () => {
       content: 10,
     };
 
-    const postCommentUseCase = new PostCommentUseCase({});
+    const mockThreadRepository = new ThreadRepository();
+    mockThreadRepository.isThreadExist = jest
+      .fn()
+      .mockImplementation(() => Promise.resolve());
 
-    expect(postCommentUseCase.execute("", payload, "")).rejects.toThrowError();
+    const mockJwtTokenManager = new JwtTokenManager();
+    mockJwtTokenManager.decodePayload = jest
+      .fn()
+      .mockImplementation(() => Promise.resolve());
+
+    const postCommentUseCase = new PostCommentUseCase({
+      commentRepository: {},
+      threadRepository: mockThreadRepository,
+      tokenManager: mockJwtTokenManager,
+    });
+
+    try {
+      await postCommentUseCase.execute("", payload, "");
+    } catch (error) {
+      expect(error.name).toBe("InvariantError");
+    }
+
+    expect(mockThreadRepository.isThreadExist).toBeCalledTimes(1);
+    expect(mockJwtTokenManager.decodePayload).toBeCalledTimes(1);
   });
 
   it("should return error when thread is not found", async () => {
@@ -91,17 +117,19 @@ describe("PostCommentUseCase", () => {
     });
 
     const mockCommentRepository = new CommentRepository();
-    const mockThreadRepository = new ThreadRepository();
-    const mockJwtTokenManager = new JwtTokenManager();
     mockCommentRepository.postComment = jest
       .fn()
       .mockImplementation(() => Promise.resolve(mockPostedComment));
-    mockJwtTokenManager.decodePayload = jest
-      .fn()
-      .mockImplementation(() => Promise.resolve({ id: "user-1" }));
+
+    const mockThreadRepository = new ThreadRepository();
     mockThreadRepository.isThreadExist = jest
       .fn()
       .mockImplementation(() => Promise.resolve());
+
+    const mockJwtTokenManager = new JwtTokenManager();
+    mockJwtTokenManager.decodePayload = jest
+      .fn()
+      .mockImplementation(() => Promise.resolve({ id: "user-1" }));
 
     const postCommentUseCase = new PostCommentUseCase({
       commentRepository: mockCommentRepository,
@@ -110,7 +138,7 @@ describe("PostCommentUseCase", () => {
     });
 
     const params = {
-      token: "Bearer token123",
+      token: "token123",
       payload,
       threadId: "thread-1",
     };

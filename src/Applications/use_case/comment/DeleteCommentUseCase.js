@@ -1,4 +1,3 @@
-import AuthenticationHandler from "../../helper/AuthenticationHandler.js";
 import AuthorizationHandler from "../../helper/AuthorizationHandler.js";
 
 class DeleteCommentUseCase {
@@ -9,9 +8,6 @@ class DeleteCommentUseCase {
   }
 
   async execute(token, threadId, commentId) {
-    await AuthenticationHandler.isAuthenticationTokenExist(token);
-    token = AuthenticationHandler.purgeBearerOfToken(token);
-
     await this._commentRepository.isCommentExist(commentId);
     await this._threadRepository.isThreadExist(threadId);
 
