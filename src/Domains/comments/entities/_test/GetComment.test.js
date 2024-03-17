@@ -21,6 +21,6 @@ describe("GetComment", () => {
     expect(res.user_id).toBe(data.user_id);
     expect(res.thread_id).toBe(data.thread_id);
     expect(res.is_deleted).toBe(data.is_deleted);
-    expect(res.created_at).toBe(new Date(data.created_at));
+    expect(res.created_at).toBe(new Date(+data.created_at));
   });
 });
