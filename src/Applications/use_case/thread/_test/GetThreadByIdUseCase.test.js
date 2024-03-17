@@ -1,7 +1,42 @@
 import ThreadRepository from "../../../../Domains/threads/ThreadRepository";
+import CommentRepository from "../../../../Domains/comments/CommentRepository";
+import ReplyRepository from "../../../../Domains/replies/ReplyRepository";
 import GetThreadByIdUseCase from "../GetThreadByIdUseCase";
+import ThreadDetails from "../../../../Domains/threads/entities/ThreadDetails";
 
 describe("GetThreadByIdUseCase", () => {
+  const mockTime = new Date();
+  jest.spyOn(global, "Date").mockImplementation(() => mockTime);
+
+  const thread = {
+    id: "thread-1",
+    title: "a title",
+    body: "a body",
+    date: new Date().getTime(),
+    username: "stewie",
+  };
+
+  const comments = [
+    {
+      id: "comment-1",
+      content: "a content",
+      date: new Date().getTime(),
+      username: "peter",
+      is_deleted: false,
+    },
+  ];
+
+  const replies = [
+    {
+      id: "reply-1",
+      content: "a content",
+      date: new Date().getTime(),
+      username: "stewie",
+      is_deleted: false,
+      comment_id: "comment-1",
+    },
+  ];
+
   it("should return error when thread is not found", async () => {
     const mockThreadRepository = new ThreadRepository();
     mockThreadRepository.isThreadExist = jest
@@ -21,25 +56,39 @@ describe("GetThreadByIdUseCase", () => {
     expect(mockThreadRepository.isThreadExist).toBeCalledWith("thread-x");
   });
 
-  it("should return object of thread detail", async () => {
+  it("should return the correct object of thread details", async () => {
     const mockThreadRepository = new ThreadRepository();
     mockThreadRepository.isThreadExist = jest
       .fn()
       .mockImplementation(() => Promise.resolve());
     mockThreadRepository.getThreadById = jest
       .fn()
-      .mockImplementation(() => Promise.resolve({ id: "thread-1" }));
+      .mockImplementation(() => Promise.resolve(thread));
+
+    const mockCommentRepository = new CommentRepository();
+    mockCommentRepository.threadsCommentsDetails = jest
+      .fn()
+      .mockImplementation(() => Promise.resolve(comments));
+
+    const mockReplyRepository = new ReplyRepository();
+    mockReplyRepository.repliesDetails = jest
+      .fn()
+      .mockImplementation(() => Promise.resolve(replies));
 
     const mockGetThreadUseCase = new GetThreadByIdUseCase({
       threadRepository: mockThreadRepository,
+      commentRepository: mockCommentRepository,
+      replyRepository: mockReplyRepository,
     });
 
     const result = await mockGetThreadUseCase.execute("thread-1");
 
-    expect(result).toStrictEqual({
-      id: "thread-1",
-    });
+    expect(result).toStrictEqual(new ThreadDetails(thread, comments, replies));
     expect(mockThreadRepository.isThreadExist).toBeCalledWith("thread-1");
     expect(mockThreadRepository.getThreadById).toBeCalledWith("thread-1");
+    expect(mockCommentRepository.threadsCommentsDetails).toBeCalledWith(
+      "thread-1"
+    );
+    expect(mockReplyRepository.repliesDetails).toBeCalledTimes(1);
   });
 });

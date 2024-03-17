@@ -1,3 +1,4 @@
+import InvariantError from "../../../../Commons/exceptions/InvariantError";
 import ThreadRepository from "../../../../Domains/threads/ThreadRepository";
 import PostThread from "../../../../Domains/threads/entities/PostThread";
 import PostedThread from "../../../../Domains/threads/entities/PostedThread";
@@ -5,24 +6,6 @@ import JwtTokenManager from "../../../../Infrastructures/security/JwtTokenManage
 import PostThreadUseCase from "../PostThreadUseCase";
 
 describe("PostThreadUseCase", () => {
-  it("should return error when token auth is not provided", async () => {
-    try {
-      const payload = {
-        title: "thread title",
-        body: "thread body content",
-      };
-
-      const postedThreadUseCase = new PostThreadUseCase({
-        threadRepository: {},
-        tokenManager: {},
-      });
-
-      await postedThreadUseCase.execute(undefined, payload);
-    } catch (error) {
-      expect(error).toBeDefined();
-    }
-  });
-
   it("should returns error when title is empty", async () => {
     const payload = {
       title: "",
@@ -33,7 +16,9 @@ describe("PostThreadUseCase", () => {
     const postedThreadUseCase = new PostThreadUseCase({});
 
     // * assert
-    expect(postedThreadUseCase.execute("", payload)).rejects.toThrowError();
+    expect(postedThreadUseCase.execute("", payload)).rejects.toThrowError(
+      InvariantError
+    );
   });
 
   it("should returns error when title has invalid data type", async () => {
@@ -59,7 +44,9 @@ describe("PostThreadUseCase", () => {
     const postedThreadUseCase = new PostThreadUseCase({});
 
     // * assert
-    expect(postedThreadUseCase.execute("", payload)).rejects.toThrowError();
+    expect(postedThreadUseCase.execute("", payload)).rejects.toThrowError(
+      InvariantError
+    );
   });
 
   it("should returns error when body has invalid data type", async () => {
@@ -85,7 +72,9 @@ describe("PostThreadUseCase", () => {
     const postedThreadUseCase = new PostThreadUseCase({});
 
     // * assert
-    expect(postedThreadUseCase.execute("", payload)).rejects.toThrowError();
+    expect(postedThreadUseCase.execute("", payload)).rejects.toThrowError(
+      InvariantError
+    );
   });
 
   it("should orchestrate the post thread action correctly", async () => {
@@ -124,10 +113,7 @@ describe("PostThreadUseCase", () => {
     });
 
     // * action
-    const postedThread = await postedThreadUseCase.execute(
-      "Bearer token123",
-      payload
-    );
+    const postedThread = await postedThreadUseCase.execute("token123", payload);
 
     // * assert
     expect(postedThread).toStrictEqual(

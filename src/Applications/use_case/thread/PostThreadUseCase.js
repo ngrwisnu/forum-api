@@ -1,6 +1,5 @@
 import PostThread from "../../../Domains/threads/entities/PostThread.js";
 import JoiValidation from "../../validation/JoiValidation.js";
-import AuthenticationHandler from "../../helper/AuthenticationHandler.js";
 import ThreadSchema from "../../validation/threadSchema.js";
 
 class PostThreadUseCase {
@@ -10,9 +9,6 @@ class PostThreadUseCase {
   }
 
   async execute(token, payload) {
-    await AuthenticationHandler.isAuthenticationTokenExist(token);
-    token = AuthenticationHandler.purgeBearerOfToken(token);
-
     const request = JoiValidation.validate(ThreadSchema.POST_THREAD, payload);
 
     const user = await this._tokenManager.decodePayload(token);
