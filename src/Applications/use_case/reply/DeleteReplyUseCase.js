@@ -1,4 +1,3 @@
-import AuthenticationHandler from "../../helper/AuthenticationHandler.js";
 import AuthorizationHandler from "../../helper/AuthorizationHandler.js";
 
 class DeleteReplyUseCase {
@@ -15,11 +14,8 @@ class DeleteReplyUseCase {
   }
 
   async execute({ token, threadId, commentId, replyId }) {
-    await AuthenticationHandler.isAuthenticationTokenExist(token);
-    token = AuthenticationHandler.purgeBearerOfToken(token);
-
-    await this._commentRepository.isCommentExist(commentId);
     await this._threadRepository.isThreadExist(threadId);
+    await this._commentRepository.isCommentExist(commentId);
     await this._replyRepository.isReplyExist(replyId);
 
     const user = await this._tokenManager.decodePayload(token);

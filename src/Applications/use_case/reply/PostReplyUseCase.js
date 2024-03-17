@@ -1,6 +1,5 @@
 import PostReply from "../../../Domains/replies/entities/PostReply.js";
 import JoiValidation from "../../validation/JoiValidation.js";
-import AuthenticationHandler from "../../helper/AuthenticationHandler.js";
 import ReplySchema from "../../validation/ReplySchema.js";
 
 class PostReplyUseCase {
@@ -17,9 +16,6 @@ class PostReplyUseCase {
   }
 
   async execute({ token, payload, threadId, commentId }) {
-    await AuthenticationHandler.isAuthenticationTokenExist(token);
-    token = AuthenticationHandler.purgeBearerOfToken(token);
-
     await this._threadRepository.isThreadExist(threadId);
     await this._commentRepository.isCommentExist(commentId);
 
