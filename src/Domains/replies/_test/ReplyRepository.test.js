@@ -4,9 +4,20 @@ describe("ReplyRepository", () => {
   it("should throw an error when invoke the abstract", async () => {
     const replyRepository = new ReplyRepository();
 
-    expect(replyRepository.postReply({})).rejects.toThrowError();
-    expect(replyRepository.getReplyById("")).rejects.toThrowError();
-    expect(replyRepository.deleteReplyById("")).rejects.toThrowError();
-    expect(replyRepository.isReplyExist("")).rejects.toThrowError();
+    expect(replyRepository.postReply({})).rejects.toThrowError(
+      "REPLY_REPOSITORY.METHOD_NOT_IMPLEMENTED"
+    );
+    expect(replyRepository.getReplyById("")).rejects.toThrowError(
+      "REPLY_REPOSITORY.METHOD_NOT_IMPLEMENTED"
+    );
+    expect(replyRepository.deleteReplyById("")).rejects.toThrowError(
+      "REPLY_REPOSITORY.METHOD_NOT_IMPLEMENTED"
+    );
+    expect(replyRepository.isReplyExist("")).rejects.toThrowError(
+      "REPLY_REPOSITORY.METHOD_NOT_IMPLEMENTED"
+    );
+    expect(replyRepository.repliesDetails()).rejects.toThrowError(
+      "REPLY_REPOSITORY.METHOD_NOT_IMPLEMENTED"
+    );
   });
 });
