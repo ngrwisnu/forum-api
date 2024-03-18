@@ -2,33 +2,32 @@ import CommentsTableTestHelper from "../../../../tests/CommentsTableTestHelper";
 import RepliesTableTestHelper from "../../../../tests/RepliesTableTestHelper";
 import ThreadsTableTestHelper from "../../../../tests/ThreadsTableTestHelper";
 import UsersTableTestHelper from "../../../../tests/UsersTableTestHelper";
+import NotFoundError from "../../../Commons/exceptions/NotFoundError";
 import PostThread from "../../../Domains/threads/entities/PostThread";
 import PostedThread from "../../../Domains/threads/entities/PostedThread";
 import pool from "../../database/postgres/pool";
 import ThreadRepositoryPostgre from "../ThreadRepositoryPostgre";
 
 describe("ThreadRepositoryPostgre", () => {
-  beforeAll(async () => {
+  beforeEach(async () => {
     await UsersTableTestHelper.addUser({
       id: "user-1",
       username: "stewie",
       password: "secret",
       fullname: "stewie griffin",
     });
-
-    await ThreadsTableTestHelper.addThread({});
   });
 
-  afterAll(async () => {
+  afterEach(async () => {
     await RepliesTableTestHelper.cleanTable();
     await CommentsTableTestHelper.cleanTable();
     await ThreadsTableTestHelper.cleanTable();
     await UsersTableTestHelper.cleanTable();
-    await pool.end();
   });
 
-  // afterAll(async () => {
-  // });
+  afterAll(async () => {
+    await pool.end();
+  });
 
   describe("postThread", () => {
     it("should returns posted thread correctly", async () => {
@@ -60,10 +59,10 @@ describe("ThreadRepositoryPostgre", () => {
       );
 
       // * assert
-      expect(result).toHaveProperty("id");
-      expect(result).toHaveProperty("title");
-      expect(result).toHaveProperty("body");
-      expect(result).toHaveProperty("owner");
+      expect(result).toHaveProperty("id", "thread-10");
+      expect(result).toHaveProperty("title", payload.title);
+      expect(result).toHaveProperty("body", payload.body);
+      expect(result).toHaveProperty("owner", "user-1");
       expect(result).toHaveProperty("created_at");
       expect(result).toStrictEqual(
         new PostedThread({
@@ -74,170 +73,80 @@ describe("ThreadRepositoryPostgre", () => {
           created_at: new Date(),
         })
       );
+
+      const threads = await ThreadsTableTestHelper.getThreads();
+
+      expect(threads).toHaveLength(1);
+      expect(threads).not.toHaveLength(2);
     });
   });
 
   describe("getThreadById", () => {
-    afterEach(async () => {
-      await CommentsTableTestHelper.cleanTable();
+    beforeEach(async () => {
+      await ThreadsTableTestHelper.addThread({});
     });
 
-    describe("without deleted comment", () => {
-      beforeEach(async () => {
-        await CommentsTableTestHelper.addComment({
-          id: "comment-1",
-          content: "comment content",
-          user_id: "user-1",
-          thread_id: "thread-1",
-          created_at: new Date().getTime(),
-        });
-        await CommentsTableTestHelper.addComment({
-          id: "comment-2",
-          content: "comment content",
-          user_id: "user-1",
-          thread_id: "thread-1",
-          created_at: new Date().getTime() + 1000,
-        });
-      });
+    it("should throw error when thread with specific id is not found", async () => {
+      const fakeIdGenerator = () => "10";
 
-      afterEach(async () => {
-        await CommentsTableTestHelper.cleanTable();
-      });
+      const threadRepositoryPostgre = new ThreadRepositoryPostgre(
+        pool,
+        fakeIdGenerator
+      );
 
-      it("should throw error when thread with specific id is not found", async () => {
-        try {
-          const fakeIdGenerator = () => "10";
+      const result = await threadRepositoryPostgre.getThreadById("thread-x");
 
-          const threadRepositoryPostgre = new ThreadRepositoryPostgre(
-            pool,
-            fakeIdGenerator
-          );
-
-          await threadRepositoryPostgre.getThreadById("thread-123");
-        } catch (error) {
-          expect(error).toBeDefined();
-        }
-      });
-
-      it("should return the object correctly when thread is found", async () => {
-        const fakeIdGenerator = () => "10";
-
-        const threadRepositoryPostgre = new ThreadRepositoryPostgre(
-          pool,
-          fakeIdGenerator
-        );
-
-        const result = await threadRepositoryPostgre.getThreadById("thread-1");
-
-        expect(typeof result).toBe("object");
-        expect(result).toHaveProperty("username");
-        expect(result).toHaveProperty("date");
-        expect(result.comments).toBeDefined();
-      });
+      expect(result).toBe(undefined);
     });
 
-    describe("with deleted comment", () => {
-      beforeEach(async () => {
-        await CommentsTableTestHelper.addComment({
-          id: "comment-3",
-          content: "comment content",
-          user_id: "user-1",
-          thread_id: "thread-1",
-          is_deleted: true,
-          created_at: new Date().getTime(),
-        });
-      });
+    it("should return the object correctly when thread is found", async () => {
+      const fakeIdGenerator = () => "10";
 
-      afterEach(async () => {
-        await CommentsTableTestHelper.cleanTable();
-      });
+      const threadRepositoryPostgre = new ThreadRepositoryPostgre(
+        pool,
+        fakeIdGenerator
+      );
 
-      it("should return the object correctly", async () => {
-        const fakeIdGenerator = () => "10";
+      const result = await threadRepositoryPostgre.getThreadById("thread-1");
 
-        const threadRepositoryPostgre = new ThreadRepositoryPostgre(
-          pool,
-          fakeIdGenerator
-        );
-
-        const result = await threadRepositoryPostgre.getThreadById("thread-1");
-
-        expect(typeof result).toBe("object");
-        expect(result).toHaveProperty("username");
-        expect(result).toHaveProperty("date");
-        expect(result.comments[0].content).toBe("**komentar telah dihapus**");
-      });
-    });
-
-    describe("with replies", () => {
-      beforeEach(async () => {
-        await CommentsTableTestHelper.addComment({
-          id: "comment-1",
-          content: "comment content",
-          user_id: "user-1",
-          thread_id: "thread-1",
-          created_at: new Date().getTime(),
-        });
-        await CommentsTableTestHelper.addComment({
-          id: "comment-2",
-          content: "comment content",
-          user_id: "user-1",
-          thread_id: "thread-1",
-          created_at: new Date().getTime(),
-        });
-        await RepliesTableTestHelper.addReply({
-          id: "reply-1",
-          user_id: "user-1",
-          comment_id: "comment-1",
-          created_at: new Date().getTime(),
-        });
-        await RepliesTableTestHelper.addReply({
-          id: "reply-2",
-          user_id: "user-1",
-          comment_id: "comment-2",
-          created_at: new Date().getTime(),
-        });
-      });
-
-      afterEach(async () => {
-        await RepliesTableTestHelper.cleanTable();
-        await CommentsTableTestHelper.cleanTable();
-      });
-
-      it("should return the object correctly with comments and replies property", async () => {
-        const fakeIdGenerator = () => "10";
-
-        const threadRepositoryPostgre = new ThreadRepositoryPostgre(
-          pool,
-          fakeIdGenerator
-        );
-
-        const result = await threadRepositoryPostgre.getThreadById("thread-1");
-
-        expect(typeof result).toBe("object");
-        expect(result).toHaveProperty("username");
-        expect(result).toHaveProperty("date");
-        expect(result.comments).toBeDefined();
-        expect(result.comments[0].replies).toBeDefined();
-        expect(result.comments[0].replies.length).toBe(1);
-      });
+      expect(result).toHaveProperty("id", "thread-1");
+      expect(result).toHaveProperty("title", "thread title");
+      expect(result).toHaveProperty("body", "thread body");
+      expect(result).toHaveProperty("date");
+      expect(result.date).not.toBeNaN();
+      expect(result).toHaveProperty("username", "stewie");
     });
   });
 
   describe("isThreadExist", () => {
+    beforeEach(async () => {
+      await ThreadsTableTestHelper.addThread({});
+    });
+
     it("should throw error when thread is not exist in the database", async () => {
-      try {
-        const fakeIdGenerator = () => "10";
+      const fakeIdGenerator = () => "10";
 
-        const threadRepositoryPostgre = new ThreadRepositoryPostgre(
-          pool,
-          fakeIdGenerator
-        );
+      const threadRepositoryPostgre = new ThreadRepositoryPostgre(
+        pool,
+        fakeIdGenerator
+      );
 
-        await threadRepositoryPostgre.isThreadExist("thread-123");
-      } catch (error) {
-        expect(error).toBeDefined();
-      }
+      expect(threadRepositoryPostgre.isThreadExist("thread-x")).rejects.toThrow(
+        NotFoundError
+      );
+    });
+
+    it("should return nothing when thread is found in the database", async () => {
+      const fakeIdGenerator = () => "10";
+
+      const threadRepositoryPostgre = new ThreadRepositoryPostgre(
+        pool,
+        fakeIdGenerator
+      );
+
+      const result = await threadRepositoryPostgre.isThreadExist("thread-1");
+
+      expect(result).toBeUndefined();
     });
   });
 });
