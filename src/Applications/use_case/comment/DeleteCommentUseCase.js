@@ -1,20 +1,18 @@
 import AuthorizationHandler from "../../helper/AuthorizationHandler.js";
 
 class DeleteCommentUseCase {
-  constructor({ commentRepository, threadRepository, tokenManager }) {
+  constructor({ commentRepository, threadRepository }) {
     this._commentRepository = commentRepository;
     this._threadRepository = threadRepository;
-    this._tokenManager = tokenManager;
   }
 
-  async execute(token, threadId, commentId) {
+  async execute(uid, threadId, commentId) {
     await this._commentRepository.isCommentExist(commentId);
     await this._threadRepository.isThreadExist(threadId);
 
-    const user = await this._tokenManager.decodePayload(token);
     const comment = await this._commentRepository.getCommentById(commentId);
 
-    await AuthorizationHandler.isAuthorized(comment.user_id, user.id);
+    await AuthorizationHandler.isAuthorized(comment.user_id, uid);
 
     return this._commentRepository.deleteCommentById(commentId);
   }

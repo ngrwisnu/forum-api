@@ -6,11 +6,34 @@ import authentications from "../../Interfaces/http/api/authentications/index.js"
 import threads from "../../Interfaces/http/api/threads/index.js";
 import comments from "../../Interfaces/http/api/comments/index.js";
 import replies from "../../Interfaces/http/api/replies/index.js";
+import Jwt from "@hapi/jwt";
 
 const createServer = async (container) => {
   const server = Hapi.server({
     host: process.env.HOST,
     port: process.env.PORT,
+  });
+
+  await server.register([
+    {
+      plugin: Jwt,
+    },
+  ]);
+
+  server.auth.strategy("forumapi_jwt", "jwt", {
+    keys: process.env.ACCESS_TOKEN_KEY,
+    verify: {
+      aud: false,
+      iss: false,
+      sub: false,
+      maxAgeSec: process.env.ACCESS_TOKEN_AGE,
+    },
+    validate: (artifacts) => ({
+      isValid: true,
+      credentials: {
+        id: artifacts.decoded.payload.id,
+      },
+    }),
   });
 
   await server.register([
@@ -62,8 +85,7 @@ const createServer = async (container) => {
       // penanganan server error sesuai kebutuhan
       const newResponse = h.response({
         status: "error",
-        // message: "terjadi kegagalan pada server kami",
-        message: response,
+        message: "terjadi kegagalan pada server kami",
       });
       newResponse.code(500);
       return newResponse;

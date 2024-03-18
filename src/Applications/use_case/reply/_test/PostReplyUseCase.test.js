@@ -1,13 +1,13 @@
+import InvariantError from "../../../../Commons/exceptions/InvariantError";
 import CommentRepository from "../../../../Domains/comments/CommentRepository";
 import ReplyRepository from "../../../../Domains/replies/ReplyRepository";
 import PostReply from "../../../../Domains/replies/entities/PostReply";
 import PostedReply from "../../../../Domains/replies/entities/PostedReply";
 import ThreadRepository from "../../../../Domains/threads/ThreadRepository";
-import JwtTokenManager from "../../../../Infrastructures/security/JwtTokenManager";
 import PostReplyUseCase from "../PostReplyUseCase";
 
 describe("PostReplyUseCase", () => {
-  it("should return error when thread is not found", async () => {
+  it("should throw error when thread is not found", async () => {
     const mockThreadRepository = new ThreadRepository();
     mockThreadRepository.isThreadExist = jest
       .fn()
@@ -16,12 +16,11 @@ describe("PostReplyUseCase", () => {
     const postReplyUseCase = new PostReplyUseCase({
       replyRepository: {},
       commentRepository: {},
-      tokenManager: {},
       threadRepository: mockThreadRepository,
     });
 
     const params = {
-      token: "token123",
+      uid: "user-1",
       payload: {},
       threadId: "",
       commentId: "",
@@ -36,7 +35,7 @@ describe("PostReplyUseCase", () => {
     expect(mockThreadRepository.isThreadExist).toBeCalledWith(params.threadId);
   });
 
-  it("should return error when comment is not found", async () => {
+  it("should throw error when comment is not found", async () => {
     const mockThreadRepository = new ThreadRepository();
     mockThreadRepository.isThreadExist = jest
       .fn()
@@ -50,12 +49,11 @@ describe("PostReplyUseCase", () => {
     const postReplyUseCase = new PostReplyUseCase({
       replyRepository: {},
       commentRepository: mockCommentRepository,
-      tokenManager: {},
       threadRepository: mockThreadRepository,
     });
 
     const params = {
-      token: "token123",
+      uid: "user-1",
       payload: {},
       threadId: "",
       commentId: "comment-x",
@@ -73,7 +71,7 @@ describe("PostReplyUseCase", () => {
     );
   });
 
-  it("should return error when content is empty", async () => {
+  it("should throw error when content is empty", async () => {
     const payload = {
       content: "",
     };
@@ -88,20 +86,14 @@ describe("PostReplyUseCase", () => {
       .fn()
       .mockImplementation(() => Promise.resolve());
 
-    const mockJwtTokenManager = new JwtTokenManager();
-    mockJwtTokenManager.decodePayload = jest
-      .fn()
-      .mockImplementation(() => Promise.resolve({ id: "user-1" }));
-
     const postReplyUseCase = new PostReplyUseCase({
       replyRepository: {},
       commentRepository: mockCommentRepository,
       threadRepository: mockThreadRepository,
-      tokenManager: mockJwtTokenManager,
     });
 
     const params = {
-      token: "",
+      uid: "",
       payload,
       threadId: "",
       commentId: "",
@@ -110,17 +102,16 @@ describe("PostReplyUseCase", () => {
     try {
       await postReplyUseCase.execute(params);
     } catch (error) {
-      expect(error.name).toBe("InvariantError");
+      expect(error).toBeInstanceOf(InvariantError);
     }
 
     expect(mockThreadRepository.isThreadExist).toBeCalledWith(params.threadId);
     expect(mockCommentRepository.isCommentExist).toBeCalledWith(
       params.commentId
     );
-    expect(mockJwtTokenManager.decodePayload).toBeCalledWith(params.token);
   });
 
-  it("should return error when content has invalid data type", async () => {
+  it("should throw error when content has invalid data type", async () => {
     const payload = {
       content: true,
     };
@@ -135,20 +126,14 @@ describe("PostReplyUseCase", () => {
       .fn()
       .mockImplementation(() => Promise.resolve());
 
-    const mockJwtTokenManager = new JwtTokenManager();
-    mockJwtTokenManager.decodePayload = jest
-      .fn()
-      .mockImplementation(() => Promise.resolve({ id: "user-1" }));
-
     const postReplyUseCase = new PostReplyUseCase({
       replyRepository: {},
       commentRepository: mockCommentRepository,
       threadRepository: mockThreadRepository,
-      tokenManager: mockJwtTokenManager,
     });
 
     const params = {
-      token: "",
+      uid: "",
       payload,
       threadId: "",
       commentId: "",
@@ -157,14 +142,13 @@ describe("PostReplyUseCase", () => {
     try {
       await postReplyUseCase.execute(params);
     } catch (error) {
-      expect(error.name).toBe("InvariantError");
+      expect(error).toBeInstanceOf(InvariantError);
     }
 
     expect(mockThreadRepository.isThreadExist).toBeCalledWith(params.threadId);
     expect(mockCommentRepository.isCommentExist).toBeCalledWith(
       params.commentId
     );
-    expect(mockJwtTokenManager.decodePayload).toBeCalledWith(params.token);
   });
 
   it("should orchestrate the post reply action correctly", async () => {
@@ -194,11 +178,6 @@ describe("PostReplyUseCase", () => {
       .fn()
       .mockImplementation(() => Promise.resolve());
 
-    const mockJwtTokenManager = new JwtTokenManager();
-    mockJwtTokenManager.decodePayload = jest
-      .fn()
-      .mockImplementation(() => Promise.resolve({ id: "user-1" }));
-
     const mockReplyRepository = new ReplyRepository();
     mockReplyRepository.postReply = jest
       .fn()
@@ -208,11 +187,10 @@ describe("PostReplyUseCase", () => {
       replyRepository: mockReplyRepository,
       commentRepository: mockCommentRepository,
       threadRepository: mockThreadRepository,
-      tokenManager: mockJwtTokenManager,
     });
 
     const params = {
-      token: "token123",
+      uid: "user-1",
       payload,
       threadId: "thread-1",
       commentId: "comment-1",
@@ -242,6 +220,5 @@ describe("PostReplyUseCase", () => {
     expect(mockCommentRepository.isCommentExist).toBeCalledWith(
       params.commentId
     );
-    expect(mockJwtTokenManager.decodePayload).toBeCalledWith(params.token);
   });
 });

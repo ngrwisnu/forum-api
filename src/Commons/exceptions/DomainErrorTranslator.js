@@ -36,7 +36,7 @@ DomainErrorTranslator._directories = {
   "DELETE_AUTHENTICATION_USE_CASE.PAYLOAD_NOT_MEET_DATA_TYPE_SPECIFICATION":
     new InvariantError("refresh token harus string"),
   "AUTHENTICATION_HELPER.NOT_AUTHENTICATED": new AuthenticationError(
-    "Missing authentication"
+    "Missing auth"
   ),
   "AUTHORIZATION_HELPER.UNAUTHORIZED_USER": new AuthorizationError(
     "Unauthorized"

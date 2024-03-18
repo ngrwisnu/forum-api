@@ -3,17 +3,14 @@ import JoiValidation from "../../validation/JoiValidation.js";
 import ThreadSchema from "../../validation/threadSchema.js";
 
 class PostThreadUseCase {
-  constructor({ threadRepository, tokenManager }) {
+  constructor({ threadRepository }) {
     this._threadRepository = threadRepository;
-    this._tokenManager = tokenManager;
   }
 
-  async execute(token, payload) {
+  async execute(uid, payload) {
     const request = JoiValidation.validate(ThreadSchema.POST_THREAD, payload);
 
-    const user = await this._tokenManager.decodePayload(token);
-
-    request.user_id = user.id;
+    request.user_id = uid;
     request.created_at = new Date().getTime();
 
     const postThreadPayload = new PostThread(request);

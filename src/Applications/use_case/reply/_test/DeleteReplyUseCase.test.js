@@ -1,11 +1,10 @@
 import CommentRepository from "../../../../Domains/comments/CommentRepository";
 import ReplyRepository from "../../../../Domains/replies/ReplyRepository";
 import ThreadRepository from "../../../../Domains/threads/ThreadRepository";
-import JwtTokenManager from "../../../../Infrastructures/security/JwtTokenManager";
 import DeleteReplyUseCase from "../DeleteReplyUseCase";
 
 describe("DeleteReplyUseCase", () => {
-  it("should return error when thread is not found", async () => {
+  it("should throw error when thread is not found", async () => {
     const mockThreadRepository = new ThreadRepository();
     mockThreadRepository.isThreadExist = jest
       .fn()
@@ -14,12 +13,11 @@ describe("DeleteReplyUseCase", () => {
     const deleteReplyUseCase = new DeleteReplyUseCase({
       replyRepository: {},
       commentRepository: {},
-      tokenManager: {},
       threadRepository: mockThreadRepository,
     });
 
     const params = {
-      token: "token123",
+      uid: "user-1",
       commentId: "comment-1",
       threadId: "thread-x",
       replyId: "",
@@ -34,7 +32,7 @@ describe("DeleteReplyUseCase", () => {
     expect(mockThreadRepository.isThreadExist).toBeCalledWith(params.threadId);
   });
 
-  it("should return error when comment is not found", async () => {
+  it("should throw error when comment is not found", async () => {
     const mockThreadRepository = new ThreadRepository();
     mockThreadRepository.isThreadExist = jest
       .fn()
@@ -48,12 +46,11 @@ describe("DeleteReplyUseCase", () => {
     const deleteReplyUseCase = new DeleteReplyUseCase({
       replyRepository: {},
       commentRepository: mockCommentRepository,
-      tokenManager: {},
       threadRepository: mockThreadRepository,
     });
 
     const params = {
-      token: "token123",
+      uid: "user-1",
       commentId: "comment-x",
       threadId: "",
       replyId: "",
@@ -71,7 +68,7 @@ describe("DeleteReplyUseCase", () => {
     );
   });
 
-  it("should return error when reply is not found", async () => {
+  it("should throw error when reply is not found", async () => {
     const mockThreadRepository = new ThreadRepository();
     mockThreadRepository.isThreadExist = jest
       .fn()
@@ -90,12 +87,11 @@ describe("DeleteReplyUseCase", () => {
     const deleteReplyUseCase = new DeleteReplyUseCase({
       replyRepository: mockReplyRepository,
       commentRepository: mockCommentRepository,
-      tokenManager: {},
       threadRepository: mockThreadRepository,
     });
 
     const params = {
-      token: "token123",
+      uid: "user-1",
       commentId: "comment-1",
       threadId: "thread-1",
       replyId: "reply-x",
@@ -114,7 +110,7 @@ describe("DeleteReplyUseCase", () => {
     expect(mockReplyRepository.isReplyExist).toBeCalledWith(params.replyId);
   });
 
-  it("should return error when user is unauthorized", async () => {
+  it("should throw error when user is unauthorized", async () => {
     const mockThreadRepository = new ThreadRepository();
     mockThreadRepository.isThreadExist = jest
       .fn()
@@ -133,22 +129,16 @@ describe("DeleteReplyUseCase", () => {
       );
     mockReplyRepository.getReplyById = jest
       .fn()
-      .mockImplementation(() => Promise.resolve({ user_id: "user-x" }));
-
-    const mockJwtTokenManager = new JwtTokenManager();
-    mockJwtTokenManager.decodePayload = jest
-      .fn()
-      .mockImplementation(() => Promise.resolve({ id: "user-1" }));
+      .mockImplementation(() => Promise.resolve({ user_id: "user-1" }));
 
     const deleteReplyUseCase = new DeleteReplyUseCase({
       replyRepository: mockReplyRepository,
       commentRepository: mockCommentRepository,
       threadRepository: mockThreadRepository,
-      tokenManager: mockJwtTokenManager,
     });
 
     const params = {
-      token: "token123",
+      uid: "user-x",
       commentId: "comment-1",
       threadId: "thread-1",
       replyId: "reply-1",
@@ -166,7 +156,6 @@ describe("DeleteReplyUseCase", () => {
     );
     expect(mockReplyRepository.isReplyExist).toBeCalledWith(params.replyId);
     expect(mockReplyRepository.getReplyById).toBeCalledWith(params.replyId);
-    expect(mockJwtTokenManager.decodePayload).toBeCalledWith(params.token);
   });
 
   it("should orchestrate the delete reply action correctly", async () => {
@@ -191,20 +180,14 @@ describe("DeleteReplyUseCase", () => {
       .fn()
       .mockImplementation(() => Promise.resolve(1));
 
-    const mockJwtTokenManager = new JwtTokenManager();
-    mockJwtTokenManager.decodePayload = jest
-      .fn()
-      .mockImplementation(() => Promise.resolve({ id: "user-1" }));
-
     const deleteReplyUseCase = new DeleteReplyUseCase({
       replyRepository: mockReplyRepository,
       commentRepository: mockCommentRepository,
       threadRepository: mockThreadRepository,
-      tokenManager: mockJwtTokenManager,
     });
 
     const params = {
-      token: "token123",
+      uid: "user-1",
       commentId: "comment-1",
       threadId: "thread-1",
       replyId: "reply-1",
@@ -219,6 +202,5 @@ describe("DeleteReplyUseCase", () => {
     expect(mockReplyRepository.isReplyExist).toBeCalledWith(params.replyId);
     expect(mockReplyRepository.getReplyById).toBeCalledWith(params.replyId);
     expect(mockReplyRepository.deleteReplyById).toBeCalledWith(params.replyId);
-    expect(mockJwtTokenManager.decodePayload).toBeCalledWith(params.token);
   });
 });

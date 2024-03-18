@@ -46,7 +46,6 @@ describe("/replies endpoint", () => {
 
       const replyResponseJSON = JSON.parse(replyResponse.payload);
       expect(replyResponse.statusCode).toEqual(401);
-      expect(replyResponseJSON.status).toBe("fail");
       expect(replyResponseJSON.message).toBeDefined();
     });
 
@@ -77,9 +76,7 @@ describe("/replies endpoint", () => {
       const authResponseJSON = JSON.parse(authResponse.payload);
 
       // * get token
-      const token = await AuthenticationsTableTestHelper.findToken(
-        authResponseJSON.data.refreshToken
-      );
+      const token = authResponseJSON.data.accessToken;
 
       const payload = {
         content: "",
@@ -90,7 +87,7 @@ describe("/replies endpoint", () => {
         url: "/threads/thread-1/comments/comment-1/replies",
         payload,
         headers: {
-          authorization: `Bearer ${token[0].token}`,
+          authorization: `Bearer ${token}`,
         },
       });
 
@@ -128,9 +125,7 @@ describe("/replies endpoint", () => {
       const authResponseJSON = JSON.parse(authResponse.payload);
 
       // * get token
-      const token = await AuthenticationsTableTestHelper.findToken(
-        authResponseJSON.data.refreshToken
-      );
+      const token = authResponseJSON.data.accessToken;
 
       const payload = {
         content: "reply content",
@@ -141,7 +136,7 @@ describe("/replies endpoint", () => {
         url: "/threads/thread-x/comments/comment-1/replies",
         payload,
         headers: {
-          authorization: `Bearer ${token[0].token}`,
+          authorization: `Bearer ${token}`,
         },
       });
 
@@ -179,9 +174,7 @@ describe("/replies endpoint", () => {
       const authResponseJSON = JSON.parse(authResponse.payload);
 
       // * get token
-      const token = await AuthenticationsTableTestHelper.findToken(
-        authResponseJSON.data.refreshToken
-      );
+      const token = authResponseJSON.data.accessToken;
 
       const payload = {
         content: "reply content",
@@ -192,7 +185,7 @@ describe("/replies endpoint", () => {
         url: "/threads/thread-1/comments/comment-x/replies",
         payload,
         headers: {
-          authorization: `Bearer ${token[0].token}`,
+          authorization: `Bearer ${token}`,
         },
       });
 
@@ -230,9 +223,7 @@ describe("/replies endpoint", () => {
       const authResponseJSON = JSON.parse(authResponse.payload);
 
       // * get token
-      const token = await AuthenticationsTableTestHelper.findToken(
-        authResponseJSON.data.refreshToken
-      );
+      const token = authResponseJSON.data.accessToken;
 
       const payload = {
         content: "reply content",
@@ -243,7 +234,7 @@ describe("/replies endpoint", () => {
         url: "/threads/thread-1/comments/comment-1/replies",
         payload,
         headers: {
-          authorization: `Bearer ${token[0].token}`,
+          authorization: `Bearer ${token}`,
         },
       });
 
@@ -253,6 +244,11 @@ describe("/replies endpoint", () => {
       expect(replyResponseJSON.data.addedReply.id).toBeDefined();
       expect(replyResponseJSON.data.addedReply.content).toBe(payload.content);
       expect(replyResponseJSON.data.addedReply.owner).toBeDefined();
+
+      const replies = await RepliesTableTestHelper.getReplies();
+
+      expect(replies).toHaveLength(1);
+      expect(replies.length).not.toBeGreaterThan(1);
     });
   });
 
@@ -284,7 +280,6 @@ describe("/replies endpoint", () => {
 
       const replyResponseJSON = JSON.parse(replyResponse.payload);
       expect(replyResponse.statusCode).toEqual(401);
-      expect(replyResponseJSON.status).toBe("fail");
       expect(replyResponseJSON.message).toBeDefined();
     });
 
@@ -304,15 +299,13 @@ describe("/replies endpoint", () => {
       const authResponseJSON = JSON.parse(authResponse.payload);
 
       // * get token
-      const token = await AuthenticationsTableTestHelper.findToken(
-        authResponseJSON.data.refreshToken
-      );
+      const token = authResponseJSON.data.accessToken;
 
       const replyResponse = await server.inject({
         method: "DELETE",
         url: "/threads/thread-1/comments/comment-1/replies/reply-1",
         headers: {
-          authorization: `Bearer ${token[0].token}`,
+          authorization: `Bearer ${token}`,
         },
       });
 
@@ -338,15 +331,13 @@ describe("/replies endpoint", () => {
       const authResponseJSON = JSON.parse(authResponse.payload);
 
       // * get token
-      const token = await AuthenticationsTableTestHelper.findToken(
-        authResponseJSON.data.refreshToken
-      );
+      const token = authResponseJSON.data.accessToken;
 
       const replyResponse = await server.inject({
         method: "DELETE",
         url: "/threads/thread-x/comments/comment-1/replies/reply-1",
         headers: {
-          authorization: `Bearer ${token[0].token}`,
+          authorization: `Bearer ${token}`,
         },
       });
 
@@ -373,15 +364,13 @@ describe("/replies endpoint", () => {
       const authResponseJSON = JSON.parse(authResponse.payload);
 
       // * get token
-      const token = await AuthenticationsTableTestHelper.findToken(
-        authResponseJSON.data.refreshToken
-      );
+      const token = authResponseJSON.data.accessToken;
 
       const replyResponse = await server.inject({
         method: "DELETE",
         url: "/threads/thread-1/comments/comment-x/replies/reply-1",
         headers: {
-          authorization: `Bearer ${token[0].token}`,
+          authorization: `Bearer ${token}`,
         },
       });
 
@@ -408,15 +397,13 @@ describe("/replies endpoint", () => {
       const authResponseJSON = JSON.parse(authResponse.payload);
 
       // * get token
-      const token = await AuthenticationsTableTestHelper.findToken(
-        authResponseJSON.data.refreshToken
-      );
+      const token = authResponseJSON.data.accessToken;
 
       const replyResponse = await server.inject({
         method: "DELETE",
         url: "/threads/thread-1/comments/comment-1/replies/reply-x",
         headers: {
-          authorization: `Bearer ${token[0].token}`,
+          authorization: `Bearer ${token}`,
         },
       });
 
@@ -443,13 +430,11 @@ describe("/replies endpoint", () => {
       const authResponseJSON = JSON.parse(authResponse.payload);
 
       // * get token
-      const token = await AuthenticationsTableTestHelper.findToken(
-        authResponseJSON.data.refreshToken
-      );
+      const token = authResponseJSON.data.accessToken;
       const tokenManager = container.getInstance(
         AuthenticationTokenManager.name
       );
-      const user = await tokenManager.decodePayload(token[0].token);
+      const user = await tokenManager.decodePayload(token);
 
       await RepliesTableTestHelper.addReply({
         id: "reply-2",
@@ -460,7 +445,7 @@ describe("/replies endpoint", () => {
         method: "DELETE",
         url: "/threads/thread-1/comments/comment-1/replies/reply-2",
         headers: {
-          authorization: `Bearer ${token[0].token}`,
+          authorization: `Bearer ${token}`,
         },
       });
 
@@ -468,6 +453,11 @@ describe("/replies endpoint", () => {
 
       expect(replyResponse.statusCode).toBe(200);
       expect(replyResponseJSON.status).toBe("success");
+
+      const replyAfter = await RepliesTableTestHelper.getReplyById("reply-2");
+
+      expect(replyAfter).toHaveProperty("id", "reply-2");
+      expect(replyAfter).toHaveProperty("is_deleted", true);
     });
   });
 });

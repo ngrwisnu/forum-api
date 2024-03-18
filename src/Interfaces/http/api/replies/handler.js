@@ -10,12 +10,12 @@ class RepliesHandler {
   }
 
   async postReplyHandler(request, h) {
-    const token = request.headers.authorization;
+    const { id: uid } = request.auth.credentials;
     const { threadId, commentId } = request.params;
     const postReplyUseCase = this._container.getInstance(PostReplyUseCase.name);
 
     const params = {
-      token,
+      uid,
       payload: request.payload,
       threadId,
       commentId,
@@ -34,7 +34,7 @@ class RepliesHandler {
   }
 
   async deleteReplyHandler(request, h) {
-    const token = request.headers.authorization;
+    const { id: uid } = request.auth.credentials;
     const { threadId, commentId, replyId } = request.params;
 
     const deleteReplyUseCase = this._container.getInstance(
@@ -42,7 +42,7 @@ class RepliesHandler {
     );
 
     const params = {
-      token,
+      uid,
       threadId,
       commentId,
       replyId,

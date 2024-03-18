@@ -213,10 +213,6 @@ container.register([
           name: "threadRepository",
           internal: ThreadRepositoryPostgre.name,
         },
-        {
-          name: "tokenManager",
-          internal: AuthenticationTokenManager.name,
-        },
       ],
     },
   },
@@ -255,10 +251,6 @@ container.register([
           name: "threadRepository",
           internal: ThreadRepositoryPostgre.name,
         },
-        {
-          name: "tokenManager",
-          internal: AuthenticationTokenManager.name,
-        },
       ],
     },
   },
@@ -275,10 +267,6 @@ container.register([
         {
           name: "threadRepository",
           internal: ThreadRepositoryPostgre.name,
-        },
-        {
-          name: "tokenManager",
-          internal: AuthenticationTokenManager.name,
         },
       ],
     },
@@ -301,10 +289,6 @@ container.register([
           name: "threadRepository",
           internal: ThreadRepositoryPostgre.name,
         },
-        {
-          name: "tokenManager",
-          internal: AuthenticationTokenManager.name,
-        },
       ],
     },
   },
@@ -325,10 +309,6 @@ container.register([
         {
           name: "threadRepository",
           internal: ThreadRepositoryPostgre.name,
-        },
-        {
-          name: "tokenManager",
-          internal: AuthenticationTokenManager.name,
         },
       ],
     },

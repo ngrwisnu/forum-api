@@ -1,10 +1,9 @@
 import CommentRepository from "../../../../Domains/comments/CommentRepository";
 import ThreadRepository from "../../../../Domains/threads/ThreadRepository";
-import JwtTokenManager from "../../../../Infrastructures/security/JwtTokenManager";
 import DeleteCommentUseCase from "../DeleteCommentUseCase";
 
 describe("DeleteCommentUseCase", () => {
-  it("should return error when comment is not found", async () => {
+  it("should throw error when comment is not found", async () => {
     const mockCommentRepository = new CommentRepository();
     mockCommentRepository.isCommentExist = jest
       .fn()
@@ -12,19 +11,18 @@ describe("DeleteCommentUseCase", () => {
 
     const deleteCommentUseCase = new DeleteCommentUseCase({
       commentRepository: mockCommentRepository,
-      tokenManager: {},
       threadRepository: {},
     });
 
     const params = {
-      token: "token123",
+      uid: "user-1",
       threadId: "thread-1",
       commentId: "comment-x",
     };
 
     try {
       await deleteCommentUseCase.execute(
-        params.token,
+        params.uid,
         params.threadId,
         params.commentId
       );
@@ -37,7 +35,7 @@ describe("DeleteCommentUseCase", () => {
     );
   });
 
-  it("should return error when thread is not found", async () => {
+  it("should throw error when thread is not found", async () => {
     const mockCommentRepository = new CommentRepository();
     mockCommentRepository.isCommentExist = jest
       .fn()
@@ -50,19 +48,18 @@ describe("DeleteCommentUseCase", () => {
 
     const deleteCommentUseCase = new DeleteCommentUseCase({
       commentRepository: mockCommentRepository,
-      tokenManager: {},
       threadRepository: mockThreadRepository,
     });
 
     const params = {
-      token: "token123",
+      uid: "user-1",
       threadId: "thread-x",
       commentId: "comment-1",
     };
 
     try {
       await deleteCommentUseCase.execute(
-        params.token,
+        params.uid,
         params.threadId,
         params.commentId
       );
@@ -76,7 +73,7 @@ describe("DeleteCommentUseCase", () => {
     expect(mockThreadRepository.isThreadExist).toBeCalledWith(params.threadId);
   });
 
-  it("should return error when user is unauthorized", async () => {
+  it("should throw error when user is unauthorized", async () => {
     const mockCommentRepository = new CommentRepository();
     mockCommentRepository.isCommentExist = jest
       .fn()
@@ -90,26 +87,20 @@ describe("DeleteCommentUseCase", () => {
       .fn()
       .mockImplementation(() => Promise.resolve());
 
-    const mockJwtTokenManager = new JwtTokenManager();
-    mockJwtTokenManager.decodePayload = jest
-      .fn()
-      .mockImplementation(() => Promise.resolve({ id: "user-11" }));
-
     const deleteCommentUseCase = new DeleteCommentUseCase({
       commentRepository: mockCommentRepository,
       threadRepository: mockThreadRepository,
-      tokenManager: mockJwtTokenManager,
     });
 
     const params = {
-      token: "token123",
+      uid: "user-x",
       threadId: "thread-1",
       commentId: "comment-1",
     };
 
     try {
       await deleteCommentUseCase.execute(
-        params.token,
+        params.uid,
         params.threadId,
         params.commentId
       );
@@ -123,7 +114,6 @@ describe("DeleteCommentUseCase", () => {
     expect(mockCommentRepository.getCommentById).toBeCalledWith(
       params.commentId
     );
-    expect(mockJwtTokenManager.decodePayload).toBeCalledWith("token123");
     expect(mockThreadRepository.isThreadExist).toBeCalledWith(params.threadId);
   });
 
@@ -144,25 +134,19 @@ describe("DeleteCommentUseCase", () => {
       .fn()
       .mockImplementation(() => Promise.resolve());
 
-    const mockJwtTokenManager = new JwtTokenManager();
-    mockJwtTokenManager.decodePayload = jest
-      .fn()
-      .mockImplementation(() => Promise.resolve({ id: "user-1" }));
-
     const deleteCommentUseCase = new DeleteCommentUseCase({
       commentRepository: mockCommentRepository,
       threadRepository: mockThreadRepository,
-      tokenManager: mockJwtTokenManager,
     });
 
     const params = {
-      token: "token123",
+      uid: "user-1",
       threadId: "thread-1",
       commentId: "comment-1",
     };
 
     await deleteCommentUseCase.execute(
-      params.token,
+      params.uid,
       params.threadId,
       params.commentId
     );
@@ -177,6 +161,5 @@ describe("DeleteCommentUseCase", () => {
       params.commentId
     );
     expect(mockThreadRepository.isThreadExist).toBeCalledWith(params.threadId);
-    expect(mockJwtTokenManager.decodePayload).toBeCalledWith("token123");
   });
 });

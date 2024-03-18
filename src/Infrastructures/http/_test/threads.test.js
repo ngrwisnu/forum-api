@@ -36,8 +36,7 @@ describe("/threads endpoint", () => {
 
       const threadResponseJSON = JSON.parse(threadResponse.payload);
       expect(threadResponse.statusCode).toEqual(401);
-      expect(threadResponseJSON.status).toBe("fail");
-      expect(threadResponseJSON.message).toBeDefined();
+      expect(threadResponseJSON.message).toBe("Missing authentication");
     });
 
     it("should return response 400 when title is invalid", async () => {
@@ -67,9 +66,7 @@ describe("/threads endpoint", () => {
       const authResponseJSON = JSON.parse(authResponse.payload);
 
       // * get token
-      const token = await AuthenticationsTableTestHelper.findToken(
-        authResponseJSON.data.refreshToken
-      );
+      const token = authResponseJSON.data.accessToken;
 
       const payload = {
         title: "",
@@ -81,7 +78,7 @@ describe("/threads endpoint", () => {
         url: "/threads",
         payload,
         headers: {
-          authorization: `Bearer ${token[0].token}`,
+          authorization: `Bearer ${token}`,
         },
       });
 
@@ -118,9 +115,7 @@ describe("/threads endpoint", () => {
       const authResponseJSON = JSON.parse(authResponse.payload);
 
       // * get token
-      const token = await AuthenticationsTableTestHelper.findToken(
-        authResponseJSON.data.refreshToken
-      );
+      const token = authResponseJSON.data.accessToken;
 
       const payload = {
         title: "thread title",
@@ -132,7 +127,7 @@ describe("/threads endpoint", () => {
         url: "/threads",
         payload,
         headers: {
-          authorization: `Bearer ${token[0].token}`,
+          authorization: `Bearer ${token}`,
         },
       });
 
@@ -169,9 +164,7 @@ describe("/threads endpoint", () => {
       const authResponseJSON = JSON.parse(authResponse.payload);
 
       // * get token
-      const token = await AuthenticationsTableTestHelper.findToken(
-        authResponseJSON.data.refreshToken
-      );
+      const token = authResponseJSON.data.accessToken;
 
       const payload = {
         title: "thread title",
@@ -183,7 +176,7 @@ describe("/threads endpoint", () => {
         url: "/threads",
         payload,
         headers: {
-          authorization: `Bearer ${token[0].token}`,
+          authorization: `Bearer ${token}`,
         },
       });
 

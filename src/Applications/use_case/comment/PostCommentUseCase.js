@@ -3,19 +3,17 @@ import JoiValidation from "../../validation/JoiValidation.js";
 import CommentSchema from "../../validation/CommentSchema.js";
 
 class PostCommentUseCase {
-  constructor({ commentRepository, threadRepository, tokenManager }) {
+  constructor({ commentRepository, threadRepository }) {
     this._commentRepository = commentRepository;
     this._threadRepository = threadRepository;
-    this._tokenManager = tokenManager;
   }
 
-  async execute(token, payload, threadId) {
+  async execute(uid, payload, threadId) {
     await this._threadRepository.isThreadExist(threadId);
 
-    const user = await this._tokenManager.decodePayload(token);
-
     const request = JoiValidation.validate(CommentSchema.POST_COMMENT, payload);
-    request.user_id = user.id;
+
+    request.user_id = uid;
     request.thread_id = threadId;
     request.created_at = new Date().getTime();
 

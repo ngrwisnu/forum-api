@@ -2,7 +2,6 @@ import InvariantError from "../../../../Commons/exceptions/InvariantError";
 import ThreadRepository from "../../../../Domains/threads/ThreadRepository";
 import PostThread from "../../../../Domains/threads/entities/PostThread";
 import PostedThread from "../../../../Domains/threads/entities/PostedThread";
-import JwtTokenManager from "../../../../Infrastructures/security/JwtTokenManager";
 import PostThreadUseCase from "../PostThreadUseCase";
 
 describe("PostThreadUseCase", () => {
@@ -101,11 +100,6 @@ describe("PostThreadUseCase", () => {
 
     // * dependency for the use case
     const mockThreadRepository = new ThreadRepository();
-    const mockJwtTokenManager = new JwtTokenManager();
-    mockJwtTokenManager.decodePayload = jest
-      .fn()
-      .mockImplementation(() => Promise.resolve({ id: "user-1" }));
-
     mockThreadRepository.postThread = jest
       .fn()
       .mockImplementation(() => Promise.resolve(mockPostedThread));
@@ -113,11 +107,10 @@ describe("PostThreadUseCase", () => {
     // * create instance of use case
     const postedThreadUseCase = new PostThreadUseCase({
       threadRepository: mockThreadRepository,
-      tokenManager: mockJwtTokenManager,
     });
 
     // * action
-    const postedThread = await postedThreadUseCase.execute("token123", payload);
+    const postedThread = await postedThreadUseCase.execute("user-1", payload);
 
     // * assert
     expect(postedThread).toStrictEqual(
@@ -129,7 +122,6 @@ describe("PostThreadUseCase", () => {
         created_at: new Date(),
       })
     );
-    expect(mockJwtTokenManager.decodePayload).toBeCalledWith("token123");
     expect(mockThreadRepository.postThread).toBeCalledWith(
       new PostThread({
         title: payload.title,

@@ -43,7 +43,6 @@ describe("/comments endpoint", () => {
 
       const commentResponseJSON = JSON.parse(commentResponse.payload);
       expect(commentResponse.statusCode).toEqual(401);
-      expect(commentResponseJSON.status).toBe("fail");
       expect(commentResponseJSON.message).toBeDefined();
     });
 
@@ -74,9 +73,7 @@ describe("/comments endpoint", () => {
       const authResponseJSON = JSON.parse(authResponse.payload);
 
       // * get token
-      const token = await AuthenticationsTableTestHelper.findToken(
-        authResponseJSON.data.refreshToken
-      );
+      const token = authResponseJSON.data.accessToken;
 
       const payload = {
         content: "",
@@ -87,7 +84,7 @@ describe("/comments endpoint", () => {
         url: "/threads/thread-1/comments",
         payload,
         headers: {
-          authorization: `Bearer ${token[0].token}`,
+          authorization: `Bearer ${token}`,
         },
       });
 
@@ -125,9 +122,7 @@ describe("/comments endpoint", () => {
       const authResponseJSON = JSON.parse(authResponse.payload);
 
       // * get token
-      const token = await AuthenticationsTableTestHelper.findToken(
-        authResponseJSON.data.refreshToken
-      );
+      const token = authResponseJSON.data.accessToken;
 
       const payload = {
         content: "comment content",
@@ -138,7 +133,7 @@ describe("/comments endpoint", () => {
         url: "/threads/thread-1/comments",
         payload,
         headers: {
-          authorization: `Bearer ${token[0].token}`,
+          authorization: `Bearer ${token}`,
         },
       });
 
@@ -150,6 +145,11 @@ describe("/comments endpoint", () => {
         payload.content
       );
       expect(commentResponseJSON.data.addedComment.owner).toBeDefined();
+
+      const comments = await CommentsTableTestHelper.getComments();
+
+      expect(comments).toHaveLength(1);
+      expect(comments.length).not.toBeGreaterThan(1);
     });
   });
 
@@ -179,7 +179,6 @@ describe("/comments endpoint", () => {
 
       const commentResponseJSON = JSON.parse(commentResponse.payload);
       expect(commentResponse.statusCode).toEqual(401);
-      expect(commentResponseJSON.status).toBe("fail");
       expect(commentResponseJSON.message).toBeDefined();
     });
 
@@ -199,9 +198,7 @@ describe("/comments endpoint", () => {
       const authResponseJSON = JSON.parse(authResponse.payload);
 
       // * get token
-      const token = await AuthenticationsTableTestHelper.findToken(
-        authResponseJSON.data.refreshToken
-      );
+      const token = authResponseJSON.data.accessToken;
 
       // * create comment
       await CommentsTableTestHelper.addComment({
@@ -213,7 +210,7 @@ describe("/comments endpoint", () => {
         method: "DELETE",
         url: "/threads/thread-1/comments/comment-1",
         headers: {
-          authorization: `Bearer ${token[0].token}`,
+          authorization: `Bearer ${token}`,
         },
       });
 
@@ -240,13 +237,11 @@ describe("/comments endpoint", () => {
       const authResponseJSON = JSON.parse(authResponse.payload);
 
       // * get token
-      const token = await AuthenticationsTableTestHelper.findToken(
-        authResponseJSON.data.refreshToken
-      );
+      const token = authResponseJSON.data.accessToken;
       const tokenManager = container.getInstance(
         AuthenticationTokenManager.name
       );
-      const user = await tokenManager.decodePayload(token[0].token);
+      const user = await tokenManager.decodePayload(token);
 
       // * create comment
       await CommentsTableTestHelper.addComment({
@@ -258,7 +253,7 @@ describe("/comments endpoint", () => {
         method: "DELETE",
         url: "/threads/thread-100/comments/comment-1",
         headers: {
-          authorization: `Bearer ${token[0].token}`,
+          authorization: `Bearer ${token}`,
         },
       });
 
@@ -285,13 +280,11 @@ describe("/comments endpoint", () => {
       const authResponseJSON = JSON.parse(authResponse.payload);
 
       // * get token
-      const token = await AuthenticationsTableTestHelper.findToken(
-        authResponseJSON.data.refreshToken
-      );
+      const token = authResponseJSON.data.accessToken;
       const tokenManager = container.getInstance(
         AuthenticationTokenManager.name
       );
-      const user = await tokenManager.decodePayload(token[0].token);
+      const user = await tokenManager.decodePayload(token);
 
       // * create comment
       await CommentsTableTestHelper.addComment({
@@ -303,7 +296,7 @@ describe("/comments endpoint", () => {
         method: "DELETE",
         url: "/threads/thread-1/comments/comment-100",
         headers: {
-          authorization: `Bearer ${token[0].token}`,
+          authorization: `Bearer ${token}`,
         },
       });
 
@@ -330,13 +323,11 @@ describe("/comments endpoint", () => {
       const authResponseJSON = JSON.parse(authResponse.payload);
 
       // * get token
-      const token = await AuthenticationsTableTestHelper.findToken(
-        authResponseJSON.data.refreshToken
-      );
+      const token = authResponseJSON.data.accessToken;
       const tokenManager = container.getInstance(
         AuthenticationTokenManager.name
       );
-      const user = await tokenManager.decodePayload(token[0].token);
+      const user = await tokenManager.decodePayload(token);
 
       // * create comment
       await CommentsTableTestHelper.addComment({
@@ -348,7 +339,7 @@ describe("/comments endpoint", () => {
         method: "DELETE",
         url: "/threads/thread-1/comments/comment-1",
         headers: {
-          authorization: `Bearer ${token[0].token}`,
+          authorization: `Bearer ${token}`,
         },
       });
 
@@ -356,6 +347,13 @@ describe("/comments endpoint", () => {
 
       expect(commentResponse.statusCode).toBe(200);
       expect(commentResponseJSON.status).toBe("success");
+
+      const commentAfter = await CommentsTableTestHelper.getCommentById(
+        "comment-1"
+      );
+
+      expect(commentAfter).toHaveProperty("id", "comment-1");
+      expect(commentAfter).toHaveProperty("is_deleted", true);
     });
   });
 });
