@@ -18,6 +18,27 @@ const CommentsTableTestHelper = {
     await pool.query(query);
   },
 
+  async getComments() {
+    const query = {
+      text: "SELECT id FROM comments",
+    };
+
+    const result = await pool.query(query);
+
+    return result.rows;
+  },
+
+  async getCommentById(id) {
+    const query = {
+      text: "SELECT * FROM comments WHERE id=$1",
+      values: [id],
+    };
+
+    const result = await pool.query(query);
+
+    return result.rows[0];
+  },
+
   async cleanTable() {
     await pool.query("DELETE FROM comments WHERE 1=1");
   },

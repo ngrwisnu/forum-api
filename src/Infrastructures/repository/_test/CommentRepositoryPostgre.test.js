@@ -6,9 +6,11 @@ import pool from "../../database/postgres/pool";
 import CommentRepositoryPostgre from "../CommentRepositoryPostgre";
 import CommentsTableTestHelper from "../../../../tests/CommentsTableTestHelper";
 import GetComment from "../../../Domains/comments/entities/GetComment";
+import NotFoundError from "../../../Commons/exceptions/NotFoundError";
+import InvariantError from "../../../Commons/exceptions/InvariantError";
 
 describe("CommentRepositoryPostgre", () => {
-  beforeAll(async () => {
+  beforeEach(async () => {
     await UsersTableTestHelper.addUser({
       id: "user-1",
     });
@@ -23,10 +25,13 @@ describe("CommentRepositoryPostgre", () => {
     });
   });
 
-  afterAll(async () => {
+  afterEach(async () => {
     await CommentsTableTestHelper.cleanTable();
     await ThreadsTableTestHelper.cleanTable();
     await UsersTableTestHelper.cleanTable();
+  });
+
+  afterAll(async () => {
     await pool.end();
   });
 
@@ -59,9 +64,9 @@ describe("CommentRepositoryPostgre", () => {
       );
 
       // * assert
-      expect(result).toHaveProperty("id");
-      expect(result).toHaveProperty("content");
-      expect(result).toHaveProperty("owner");
+      expect(result).toHaveProperty("id", "comment-10");
+      expect(result).toHaveProperty("content", payload.content);
+      expect(result).toHaveProperty("owner", "user-2");
       expect(result).toStrictEqual(
         new PostedComment({
           id: "comment-10",
@@ -72,11 +77,19 @@ describe("CommentRepositoryPostgre", () => {
           created_at: new Date(),
         })
       );
+
+      const comments = await CommentsTableTestHelper.getComments();
+
+      expect(comments).toHaveLength(1);
     });
   });
 
   describe("getCommentById", () => {
-    it("should return 404 when comment is not found", async () => {
+    beforeEach(async () => {
+      await CommentsTableTestHelper.addComment({});
+    });
+
+    it("should return error when comment is not found", async () => {
       const fakeIdGenerator = () => "10";
 
       const commentRepositoryPostgre = new CommentRepositoryPostgre(
@@ -85,8 +98,8 @@ describe("CommentRepositoryPostgre", () => {
       );
 
       expect(
-        commentRepositoryPostgre.getCommentById("comment-1")
-      ).rejects.toThrow();
+        commentRepositoryPostgre.getCommentById("comment-x")
+      ).rejects.toThrow(NotFoundError);
     });
 
     it("should return the correct object when comment is found", async () => {
@@ -97,15 +110,24 @@ describe("CommentRepositoryPostgre", () => {
         fakeIdGenerator
       );
 
-      const result = await commentRepositoryPostgre.getCommentById(
-        "comment-10"
-      );
+      const result = await commentRepositoryPostgre.getCommentById("comment-1");
 
       expect(result).toStrictEqual(new GetComment(result));
+      expect(result).toHaveProperty("id", "comment-1");
+      expect(result).toHaveProperty("content", "comment content");
+      expect(result).toHaveProperty("user_id", "user-1");
+      expect(result).toHaveProperty("thread_id", "thread-1");
+      expect(result).toHaveProperty("is_deleted", false);
+      expect(result).toHaveProperty("created_at");
+      expect(result.date).not.toBeNaN();
     });
   });
 
   describe("deleteCommentById", () => {
+    beforeEach(async () => {
+      await CommentsTableTestHelper.addComment({});
+    });
+
     it("should return error when updating process failed", async () => {
       const fakeIdGenerator = () => "10";
 
@@ -116,7 +138,7 @@ describe("CommentRepositoryPostgre", () => {
 
       await expect(
         commentRepositoryPostgre.deleteCommentById("comment-x")
-      ).rejects.toThrow();
+      ).rejects.toThrow(InvariantError);
     });
 
     it("should be able to update the is_deleted property", async () => {
@@ -128,15 +150,26 @@ describe("CommentRepositoryPostgre", () => {
       );
 
       const result = await commentRepositoryPostgre.deleteCommentById(
-        "comment-10"
+        "comment-1"
       );
 
       expect(result).toBe(1);
+      expect(result).not.toBe(0);
+
+      const comment = await CommentsTableTestHelper.getCommentById("comment-1");
+
+      expect(comment).toHaveProperty("id", "comment-1");
+      expect(comment).toHaveProperty("is_deleted", true);
+      expect(comment).not.toHaveProperty("is_deleted", false);
     });
   });
 
   describe("isCommentExist", () => {
-    it("should return 404 when comment does not exist", async () => {
+    beforeEach(async () => {
+      await CommentsTableTestHelper.addComment({});
+    });
+
+    it("should return not found error when comment does not exist", async () => {
       const fakeIdGenerator = () => "10";
 
       const commentRepositoryPostgre = new CommentRepositoryPostgre(
@@ -145,8 +178,68 @@ describe("CommentRepositoryPostgre", () => {
       );
 
       expect(
-        commentRepositoryPostgre.isCommentExist("comment-1")
-      ).rejects.toThrow();
+        commentRepositoryPostgre.isCommentExist("comment-x")
+      ).rejects.toThrow(NotFoundError);
+    });
+
+    it("should return nothing when comment does exist", async () => {
+      const fakeIdGenerator = () => "10";
+
+      const commentRepositoryPostgre = new CommentRepositoryPostgre(
+        pool,
+        fakeIdGenerator
+      );
+
+      const result = await commentRepositoryPostgre.isCommentExist("comment-1");
+
+      expect(result).toBeUndefined();
+    });
+  });
+
+  describe("threadsCommentsDetails", () => {
+    beforeEach(async () => {
+      await CommentsTableTestHelper.addComment({});
+      await CommentsTableTestHelper.addComment({
+        id: "comment-2",
+        created_at: new Date().getTime(),
+      });
+    });
+
+    it("should return comments list of a thread", async () => {
+      const fakeIdGenerator = () => "10";
+
+      const commentRepositoryPostgre = new CommentRepositoryPostgre(
+        pool,
+        fakeIdGenerator
+      );
+
+      const result = await commentRepositoryPostgre.threadsCommentsDetails(
+        "thread-1"
+      );
+
+      expect(result).toHaveLength(2);
+      expect(result[0]).toHaveProperty("id", "comment-1");
+      expect(result[0]).toHaveProperty("content", "comment content");
+      expect(result[0]).toHaveProperty("date");
+      expect(result[0].date).not.toBeNaN();
+      expect(result[0]).toHaveProperty("is_deleted", false);
+      expect(result[0]).toHaveProperty("username", "dicoding");
+    });
+
+    it("should return empty array when a thread does not have any comments", async () => {
+      const fakeIdGenerator = () => "10";
+
+      const commentRepositoryPostgre = new CommentRepositoryPostgre(
+        pool,
+        fakeIdGenerator
+      );
+
+      const result = await commentRepositoryPostgre.threadsCommentsDetails(
+        "thread-x"
+      );
+
+      expect(result).toHaveLength(0);
+      expect(result).not.toHaveLength(2);
     });
   });
 });
