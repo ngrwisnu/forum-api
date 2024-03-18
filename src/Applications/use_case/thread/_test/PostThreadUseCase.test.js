@@ -6,7 +6,7 @@ import JwtTokenManager from "../../../../Infrastructures/security/JwtTokenManage
 import PostThreadUseCase from "../PostThreadUseCase";
 
 describe("PostThreadUseCase", () => {
-  it("should returns error when title is empty", async () => {
+  it("should throw error when title is empty", async () => {
     const payload = {
       title: "",
       body: "thread body content",
@@ -21,7 +21,7 @@ describe("PostThreadUseCase", () => {
     );
   });
 
-  it("should returns error when title has invalid data type", async () => {
+  it("should throw error when title has invalid data type", async () => {
     const payload = {
       title: 10,
       body: "thread body content",
@@ -31,10 +31,12 @@ describe("PostThreadUseCase", () => {
     const postedThreadUseCase = new PostThreadUseCase({});
 
     // * assert
-    expect(postedThreadUseCase.execute("", payload)).rejects.toThrowError();
+    expect(postedThreadUseCase.execute("", payload)).rejects.toThrowError(
+      InvariantError
+    );
   });
 
-  it("should returns error when body is empty", async () => {
+  it("should throw error when body is empty", async () => {
     const payload = {
       title: "thread title",
       body: "",
@@ -49,7 +51,7 @@ describe("PostThreadUseCase", () => {
     );
   });
 
-  it("should returns error when body has invalid data type", async () => {
+  it("should throw error when body has invalid data type", async () => {
     const payload = {
       title: "thread title",
       body: true,
@@ -59,10 +61,12 @@ describe("PostThreadUseCase", () => {
     const postedThreadUseCase = new PostThreadUseCase({});
 
     // * assert
-    expect(postedThreadUseCase.execute("", payload)).rejects.toThrowError();
+    expect(postedThreadUseCase.execute("", payload)).rejects.toThrowError(
+      InvariantError
+    );
   });
 
-  it("should returns error when title or body has invalid data type", async () => {
+  it("should throw error when title or body has invalid data type", async () => {
     const payload = {
       title: 100,
       body: "thread body content",

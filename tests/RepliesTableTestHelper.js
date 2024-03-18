@@ -17,6 +17,27 @@ const RepliesTableTestHelper = {
     await pool.query(query);
   },
 
+  async getReplies() {
+    const query = {
+      text: "SELECT id FROM replies",
+    };
+
+    const result = await pool.query(query);
+
+    return result.rows;
+  },
+
+  async getReplyById(id) {
+    const query = {
+      text: "SELECT * FROM replies WHERE id=$1",
+      values: [id],
+    };
+
+    const result = await pool.query(query);
+
+    return result.rows[0];
+  },
+
   async cleanTable() {
     await pool.query("DELETE FROM replies WHERE 1=1");
   },

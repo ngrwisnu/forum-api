@@ -36,7 +36,7 @@ describe("CommentRepositoryPostgre", () => {
   });
 
   describe("postComment", () => {
-    it("should returns posted thread correctly", async () => {
+    it("should return posted thread correctly", async () => {
       const payload = {
         content: "comment content",
       };
@@ -89,7 +89,7 @@ describe("CommentRepositoryPostgre", () => {
       await CommentsTableTestHelper.addComment({});
     });
 
-    it("should return error when comment is not found", async () => {
+    it("should throw error when comment is not found", async () => {
       const fakeIdGenerator = () => "10";
 
       const commentRepositoryPostgre = new CommentRepositoryPostgre(
@@ -128,7 +128,7 @@ describe("CommentRepositoryPostgre", () => {
       await CommentsTableTestHelper.addComment({});
     });
 
-    it("should return error when updating process failed", async () => {
+    it("should throw error when updating process failed", async () => {
       const fakeIdGenerator = () => "10";
 
       const commentRepositoryPostgre = new CommentRepositoryPostgre(
@@ -169,7 +169,7 @@ describe("CommentRepositoryPostgre", () => {
       await CommentsTableTestHelper.addComment({});
     });
 
-    it("should return not found error when comment does not exist", async () => {
+    it("should throw not found error when comment does not exist", async () => {
       const fakeIdGenerator = () => "10";
 
       const commentRepositoryPostgre = new CommentRepositoryPostgre(

@@ -30,7 +30,7 @@ describe("ThreadRepositoryPostgre", () => {
   });
 
   describe("postThread", () => {
-    it("should returns posted thread correctly", async () => {
+    it("should return posted thread correctly", async () => {
       const payload = {
         title: "thread title",
         body: "thread body content",
@@ -77,7 +77,7 @@ describe("ThreadRepositoryPostgre", () => {
       const threads = await ThreadsTableTestHelper.getThreads();
 
       expect(threads).toHaveLength(1);
-      expect(threads).not.toHaveLength(2);
+      expect(threads.length).not.toBeGreaterThan(1);
     });
   });
 
