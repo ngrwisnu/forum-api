@@ -1,7 +1,7 @@
 import PostThread from "../PostThread.js";
 
 describe("PostThread entity", () => {
-  it("should creates the correct object", async () => {
+  it("should create the correct object", async () => {
     const payload = {
       title: "thread title",
       body: "thread body content",

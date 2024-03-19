@@ -1,7 +1,7 @@
 import GetThread from "../GetThread";
 
 describe("GetThread entity", () => {
-  it("should creates the correct object", async () => {
+  it("should create the correct object", async () => {
     const mockTime = new Date();
     jest.spyOn(global, "Date").mockImplementation(() => mockTime);
 

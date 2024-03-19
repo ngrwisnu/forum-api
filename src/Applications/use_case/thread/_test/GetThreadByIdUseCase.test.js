@@ -50,7 +50,7 @@ describe("GetThreadByIdUseCase", () => {
     try {
       await mockGetThreadUseCase.execute("thread-x");
     } catch (error) {
-      expect(error).toBeDefined();
+      expect(error).toBe("thread not found");
     }
 
     expect(mockThreadRepository.isThreadExist).toBeCalledWith("thread-x");
