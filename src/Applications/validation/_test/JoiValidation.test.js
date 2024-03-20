@@ -11,7 +11,9 @@ describe("JoiValidation", () => {
       title: "",
     };
 
-    expect(() => JoiValidation.validate(schema, request)).toThrow();
+    expect(() => JoiValidation.validate(schema, request)).toThrow(
+      '"title" is not allowed to be empty'
+    );
   });
 
   it("should succeed when the request meets the schema", async () => {
