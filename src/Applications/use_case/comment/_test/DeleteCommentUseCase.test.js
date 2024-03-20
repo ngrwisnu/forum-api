@@ -1,3 +1,4 @@
+import NotFoundError from "../../../../Commons/exceptions/NotFoundError";
 import CommentRepository from "../../../../Domains/comments/CommentRepository";
 import ThreadRepository from "../../../../Domains/threads/ThreadRepository";
 import DeleteCommentUseCase from "../DeleteCommentUseCase";
@@ -7,7 +8,9 @@ describe("DeleteCommentUseCase", () => {
     const mockCommentRepository = new CommentRepository();
     mockCommentRepository.isCommentExist = jest
       .fn()
-      .mockImplementation(() => Promise.reject("comment not found"));
+      .mockImplementation(() =>
+        Promise.reject(new NotFoundError("comment not found"))
+      );
 
     const deleteCommentUseCase = new DeleteCommentUseCase({
       commentRepository: mockCommentRepository,
@@ -27,12 +30,19 @@ describe("DeleteCommentUseCase", () => {
         params.commentId
       );
     } catch (error) {
-      expect(error).toBe("comment not found");
+      expect(error.message).toBe("comment not found");
     }
 
     expect(mockCommentRepository.isCommentExist).toBeCalledWith(
       params.commentId
     );
+    expect(
+      deleteCommentUseCase.execute(
+        params.uid,
+        params.threadId,
+        params.commentId
+      )
+    ).rejects.toThrow(NotFoundError);
   });
 
   it("should throw error when thread is not found", async () => {
@@ -44,7 +54,9 @@ describe("DeleteCommentUseCase", () => {
     const mockThreadRepository = new ThreadRepository();
     mockThreadRepository.isThreadExist = jest
       .fn()
-      .mockImplementation(() => Promise.reject("thread not found"));
+      .mockImplementation(() =>
+        Promise.reject(new NotFoundError("thread not found"))
+      );
 
     const deleteCommentUseCase = new DeleteCommentUseCase({
       commentRepository: mockCommentRepository,
@@ -64,13 +76,20 @@ describe("DeleteCommentUseCase", () => {
         params.commentId
       );
     } catch (error) {
-      expect(error).toBe("thread not found");
+      expect(error.message).toBe("thread not found");
     }
 
     expect(mockCommentRepository.isCommentExist).toBeCalledWith(
       params.commentId
     );
     expect(mockThreadRepository.isThreadExist).toBeCalledWith(params.threadId);
+    expect(
+      deleteCommentUseCase.execute(
+        params.uid,
+        params.threadId,
+        params.commentId
+      )
+    ).rejects.toThrow(NotFoundError);
   });
 
   it("should throw error when user is unauthorized", async () => {
@@ -115,6 +134,13 @@ describe("DeleteCommentUseCase", () => {
       params.commentId
     );
     expect(mockThreadRepository.isThreadExist).toBeCalledWith(params.threadId);
+    expect(
+      deleteCommentUseCase.execute(
+        params.uid,
+        params.threadId,
+        params.commentId
+      )
+    ).rejects.toThrow("AUTHORIZATION_HELPER.UNAUTHORIZED_USER");
   });
 
   it("should orchestrate the delete comment action correctly", async () => {
@@ -145,12 +171,13 @@ describe("DeleteCommentUseCase", () => {
       commentId: "comment-1",
     };
 
-    await deleteCommentUseCase.execute(
+    const result = await deleteCommentUseCase.execute(
       params.uid,
       params.threadId,
       params.commentId
     );
 
+    expect(result).toBe(1);
     expect(mockCommentRepository.isCommentExist).toBeCalledWith(
       params.commentId
     );

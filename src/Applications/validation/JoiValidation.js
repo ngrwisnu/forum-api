@@ -5,7 +5,7 @@ class JoiValidation extends Validation {
     const result = schema.validate(request);
 
     if (result.error) {
-      throw new Error(result.error.message);
+      throw result.error;
     }
 
     return result.value;

@@ -36,6 +36,7 @@ describe("ThreadDetails", () => {
 
     const result = new ThreadDetails(thread, comments, replies);
 
+    console.log(result);
     expect(result.id).toBe(thread.id);
     expect(result.title).toBe(thread.title);
     expect(result.body).toBe(thread.body);

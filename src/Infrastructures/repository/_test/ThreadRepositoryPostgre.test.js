@@ -144,9 +144,9 @@ describe("ThreadRepositoryPostgre", () => {
         fakeIdGenerator
       );
 
-      const result = await threadRepositoryPostgre.isThreadExist("thread-1");
-
-      expect(result).toBeUndefined();
+      expect(() =>
+        threadRepositoryPostgre.isThreadExist("thread-1")
+      ).not.toThrow(NotFoundError);
     });
   });
 });

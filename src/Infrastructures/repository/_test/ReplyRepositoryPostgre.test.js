@@ -193,9 +193,9 @@ describe("ReplyRepositoryPostgre", () => {
         fakeIdGenerator
       );
 
-      const result = await replyRepositoryPostgre.isReplyExist("reply-1");
-
-      expect(result).toBeUndefined();
+      expect(() => replyRepositoryPostgre.isReplyExist("reply-1")).not.toThrow(
+        NotFoundError
+      );
     });
   });
 

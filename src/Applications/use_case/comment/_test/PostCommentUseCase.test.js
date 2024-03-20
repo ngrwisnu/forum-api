@@ -1,4 +1,4 @@
-import InvariantError from "../../../../Commons/exceptions/InvariantError";
+import NotFoundError from "../../../../Commons/exceptions/NotFoundError";
 import CommentRepository from "../../../../Domains/comments/CommentRepository";
 import PostComment from "../../../../Domains/comments/entities/PostComment";
 import PostedComment from "../../../../Domains/comments/entities/PostedComment";
@@ -21,12 +21,9 @@ describe("PostCommentUseCase", () => {
       threadRepository: mockThreadRepository,
     });
 
-    try {
-      await postCommentUseCase.execute("", payload, "");
-    } catch (error) {
-      expect(error).toBeInstanceOf(InvariantError);
-    }
-
+    expect(postCommentUseCase.execute("", payload, "")).rejects.toThrow(
+      '"content" is not allowed to be empty'
+    );
     expect(mockThreadRepository.isThreadExist).toBeCalledTimes(1);
   });
 
@@ -45,12 +42,9 @@ describe("PostCommentUseCase", () => {
       threadRepository: mockThreadRepository,
     });
 
-    try {
-      await postCommentUseCase.execute("", payload, "");
-    } catch (error) {
-      expect(error).toBeInstanceOf(InvariantError);
-    }
-
+    expect(postCommentUseCase.execute("", payload, "")).rejects.toThrow(
+      '"content" must be a string'
+    );
     expect(mockThreadRepository.isThreadExist).toBeCalledTimes(1);
   });
 
@@ -58,7 +52,9 @@ describe("PostCommentUseCase", () => {
     const mockThreadRepository = new ThreadRepository();
     mockThreadRepository.isThreadExist = jest
       .fn()
-      .mockImplementation(() => Promise.reject("thread not found"));
+      .mockImplementation(() =>
+        Promise.reject(new NotFoundError("thread not found"))
+      );
 
     const postCommentUseCase = new PostCommentUseCase({
       commentRepository: {},
@@ -71,16 +67,9 @@ describe("PostCommentUseCase", () => {
       threadId: "",
     };
 
-    try {
-      await postCommentUseCase.execute(
-        params.uid,
-        params.payload,
-        params.threadId
-      );
-    } catch (error) {
-      expect(error).toBe("thread not found");
-    }
-
+    expect(
+      postCommentUseCase.execute(params.uid, params.payload, params.threadId)
+    ).rejects.toThrow(NotFoundError);
     expect(mockThreadRepository.isThreadExist).toBeCalledWith(params.threadId);
   });
 

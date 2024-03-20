@@ -1,4 +1,3 @@
-import InvariantError from "../../../../Commons/exceptions/InvariantError";
 import ThreadRepository from "../../../../Domains/threads/ThreadRepository";
 import PostThread from "../../../../Domains/threads/entities/PostThread";
 import PostedThread from "../../../../Domains/threads/entities/PostedThread";
@@ -16,7 +15,7 @@ describe("PostThreadUseCase", () => {
 
     // * assert
     expect(postedThreadUseCase.execute("", payload)).rejects.toThrowError(
-      InvariantError
+      '"title" is not allowed to be empty'
     );
   });
 
@@ -31,7 +30,7 @@ describe("PostThreadUseCase", () => {
 
     // * assert
     expect(postedThreadUseCase.execute("", payload)).rejects.toThrowError(
-      InvariantError
+      '"title" must be a string'
     );
   });
 
@@ -46,7 +45,7 @@ describe("PostThreadUseCase", () => {
 
     // * assert
     expect(postedThreadUseCase.execute("", payload)).rejects.toThrowError(
-      InvariantError
+      '"body" is not allowed to be empty'
     );
   });
 
@@ -61,22 +60,7 @@ describe("PostThreadUseCase", () => {
 
     // * assert
     expect(postedThreadUseCase.execute("", payload)).rejects.toThrowError(
-      InvariantError
-    );
-  });
-
-  it("should throw error when title or body has invalid data type", async () => {
-    const payload = {
-      title: 100,
-      body: "thread body content",
-    };
-
-    // * create instance of use case
-    const postedThreadUseCase = new PostThreadUseCase({});
-
-    // * assert
-    expect(postedThreadUseCase.execute("", payload)).rejects.toThrowError(
-      InvariantError
+      '"body" must be a string'
     );
   });
 

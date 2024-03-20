@@ -7,6 +7,8 @@ import threads from "../../Interfaces/http/api/threads/index.js";
 import comments from "../../Interfaces/http/api/comments/index.js";
 import replies from "../../Interfaces/http/api/replies/index.js";
 import Jwt from "@hapi/jwt";
+import pkg from "joi";
+const { ValidationError } = pkg;
 
 const createServer = async (container) => {
   const server = Hapi.server({
@@ -66,6 +68,16 @@ const createServer = async (container) => {
     if (response instanceof Error) {
       // bila response tersebut error, tangani sesuai kebutuhan
       const translatedError = DomainErrorTranslator.translate(response);
+
+      // penanganan validation error dari Joi.
+      if (translatedError instanceof ValidationError) {
+        const newResponse = h.response({
+          status: "fail",
+          message: translatedError.message,
+        });
+        newResponse.code(400);
+        return newResponse;
+      }
 
       // penanganan client error secara internal.
       if (translatedError instanceof ClientError) {

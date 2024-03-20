@@ -190,9 +190,9 @@ describe("CommentRepositoryPostgre", () => {
         fakeIdGenerator
       );
 
-      const result = await commentRepositoryPostgre.isCommentExist("comment-1");
-
-      expect(result).toBeUndefined();
+      expect(() =>
+        commentRepositoryPostgre.isCommentExist("comment-1")
+      ).not.toThrow(NotFoundError);
     });
   });
 

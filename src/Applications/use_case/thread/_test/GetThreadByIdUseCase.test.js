@@ -3,6 +3,7 @@ import CommentRepository from "../../../../Domains/comments/CommentRepository";
 import ReplyRepository from "../../../../Domains/replies/ReplyRepository";
 import GetThreadByIdUseCase from "../GetThreadByIdUseCase";
 import ThreadDetails from "../../../../Domains/threads/entities/ThreadDetails";
+import NotFoundError from "../../../../Commons/exceptions/NotFoundError";
 
 describe("GetThreadByIdUseCase", () => {
   const mockTime = new Date();
@@ -41,18 +42,17 @@ describe("GetThreadByIdUseCase", () => {
     const mockThreadRepository = new ThreadRepository();
     mockThreadRepository.isThreadExist = jest
       .fn()
-      .mockImplementation(() => Promise.reject("thread not found"));
+      .mockImplementation(() =>
+        Promise.reject(new NotFoundError("thread not found"))
+      );
 
     const mockGetThreadUseCase = new GetThreadByIdUseCase({
       threadRepository: mockThreadRepository,
     });
 
-    try {
-      await mockGetThreadUseCase.execute("thread-x");
-    } catch (error) {
-      expect(error).toBe("thread not found");
-    }
-
+    expect(mockGetThreadUseCase.execute("thread-x")).rejects.toThrow(
+      NotFoundError
+    );
     expect(mockThreadRepository.isThreadExist).toBeCalledWith("thread-x");
   });
 

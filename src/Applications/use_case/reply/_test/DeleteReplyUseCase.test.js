@@ -1,3 +1,4 @@
+import NotFoundError from "../../../../Commons/exceptions/NotFoundError";
 import CommentRepository from "../../../../Domains/comments/CommentRepository";
 import ReplyRepository from "../../../../Domains/replies/ReplyRepository";
 import ThreadRepository from "../../../../Domains/threads/ThreadRepository";
@@ -8,7 +9,9 @@ describe("DeleteReplyUseCase", () => {
     const mockThreadRepository = new ThreadRepository();
     mockThreadRepository.isThreadExist = jest
       .fn()
-      .mockImplementation(() => Promise.reject("thread not found"));
+      .mockImplementation(() =>
+        Promise.reject(new NotFoundError("thread not found"))
+      );
 
     const deleteReplyUseCase = new DeleteReplyUseCase({
       replyRepository: {},
@@ -26,10 +29,11 @@ describe("DeleteReplyUseCase", () => {
     try {
       await deleteReplyUseCase.execute(params);
     } catch (error) {
-      expect(error).toBe("thread not found");
+      expect(error.message).toBe("thread not found");
     }
 
     expect(mockThreadRepository.isThreadExist).toBeCalledWith(params.threadId);
+    expect(deleteReplyUseCase.execute(params)).rejects.toThrow(NotFoundError);
   });
 
   it("should throw error when comment is not found", async () => {
@@ -41,7 +45,9 @@ describe("DeleteReplyUseCase", () => {
     const mockCommentRepository = new CommentRepository();
     mockCommentRepository.isCommentExist = jest
       .fn()
-      .mockImplementation(() => Promise.reject("comment not found"));
+      .mockImplementation(() =>
+        Promise.reject(new NotFoundError("comment not found"))
+      );
 
     const deleteReplyUseCase = new DeleteReplyUseCase({
       replyRepository: {},
@@ -59,13 +65,14 @@ describe("DeleteReplyUseCase", () => {
     try {
       await deleteReplyUseCase.execute(params);
     } catch (error) {
-      expect(error).toBe("comment not found");
+      expect(error.message).toBe("comment not found");
     }
 
     expect(mockThreadRepository.isThreadExist).toBeCalledWith(params.threadId);
     expect(mockCommentRepository.isCommentExist).toBeCalledWith(
       params.commentId
     );
+    expect(deleteReplyUseCase.execute(params)).rejects.toThrow(NotFoundError);
   });
 
   it("should throw error when reply is not found", async () => {
@@ -82,7 +89,9 @@ describe("DeleteReplyUseCase", () => {
     const mockReplyRepository = new ReplyRepository();
     mockReplyRepository.isReplyExist = jest
       .fn()
-      .mockImplementation(() => Promise.reject("reply not found"));
+      .mockImplementation(() =>
+        Promise.reject(new NotFoundError("reply not found"))
+      );
 
     const deleteReplyUseCase = new DeleteReplyUseCase({
       replyRepository: mockReplyRepository,
@@ -100,7 +109,7 @@ describe("DeleteReplyUseCase", () => {
     try {
       await deleteReplyUseCase.execute(params);
     } catch (error) {
-      expect(error).toBe("reply not found");
+      expect(error.message).toBe("reply not found");
     }
 
     expect(mockThreadRepository.isThreadExist).toBeCalledWith(params.threadId);
@@ -108,6 +117,7 @@ describe("DeleteReplyUseCase", () => {
       params.commentId
     );
     expect(mockReplyRepository.isReplyExist).toBeCalledWith(params.replyId);
+    expect(deleteReplyUseCase.execute(params)).rejects.toThrow(NotFoundError);
   });
 
   it("should throw error when user is unauthorized", async () => {
@@ -156,6 +166,9 @@ describe("DeleteReplyUseCase", () => {
     );
     expect(mockReplyRepository.isReplyExist).toBeCalledWith(params.replyId);
     expect(mockReplyRepository.getReplyById).toBeCalledWith(params.replyId);
+    expect(deleteReplyUseCase.execute(params)).rejects.toThrow(
+      "AUTHORIZATION_HELPER.UNAUTHORIZED_USER"
+    );
   });
 
   it("should orchestrate the delete reply action correctly", async () => {
@@ -193,8 +206,9 @@ describe("DeleteReplyUseCase", () => {
       replyId: "reply-1",
     };
 
-    await deleteReplyUseCase.execute(params);
+    const result = await deleteReplyUseCase.execute(params);
 
+    expect(result).toBe(1);
     expect(mockThreadRepository.isThreadExist).toBeCalledWith(params.threadId);
     expect(mockCommentRepository.isCommentExist).toBeCalledWith(
       params.commentId

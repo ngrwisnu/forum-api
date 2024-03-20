@@ -1,4 +1,4 @@
-import InvariantError from "../../../../Commons/exceptions/InvariantError";
+import NotFoundError from "../../../../Commons/exceptions/NotFoundError";
 import CommentRepository from "../../../../Domains/comments/CommentRepository";
 import ReplyRepository from "../../../../Domains/replies/ReplyRepository";
 import PostReply from "../../../../Domains/replies/entities/PostReply";
@@ -11,7 +11,9 @@ describe("PostReplyUseCase", () => {
     const mockThreadRepository = new ThreadRepository();
     mockThreadRepository.isThreadExist = jest
       .fn()
-      .mockImplementation(() => Promise.reject("thread not found"));
+      .mockImplementation(() =>
+        Promise.reject(new NotFoundError("thread not found"))
+      );
 
     const postReplyUseCase = new PostReplyUseCase({
       replyRepository: {},
@@ -29,10 +31,11 @@ describe("PostReplyUseCase", () => {
     try {
       await postReplyUseCase.execute(params);
     } catch (error) {
-      expect(error).toBe("thread not found");
+      expect(error.message).toBe("thread not found");
     }
 
     expect(mockThreadRepository.isThreadExist).toBeCalledWith(params.threadId);
+    expect(postReplyUseCase.execute(params)).rejects.toThrow(NotFoundError);
   });
 
   it("should throw error when comment is not found", async () => {
@@ -44,7 +47,9 @@ describe("PostReplyUseCase", () => {
     const mockCommentRepository = new CommentRepository();
     mockCommentRepository.isCommentExist = jest
       .fn()
-      .mockImplementation(() => Promise.reject("comment not found"));
+      .mockImplementation(() =>
+        Promise.reject(new NotFoundError("comment not found"))
+      );
 
     const postReplyUseCase = new PostReplyUseCase({
       replyRepository: {},
@@ -62,13 +67,14 @@ describe("PostReplyUseCase", () => {
     try {
       await postReplyUseCase.execute(params);
     } catch (error) {
-      expect(error).toBe("comment not found");
+      expect(error.message).toBe("comment not found");
     }
 
     expect(mockThreadRepository.isThreadExist).toBeCalledWith(params.threadId);
     expect(mockCommentRepository.isCommentExist).toBeCalledWith(
       params.commentId
     );
+    expect(postReplyUseCase.execute(params)).rejects.toThrow(NotFoundError);
   });
 
   it("should throw error when content is empty", async () => {
@@ -102,12 +108,15 @@ describe("PostReplyUseCase", () => {
     try {
       await postReplyUseCase.execute(params);
     } catch (error) {
-      expect(error).toBeInstanceOf(InvariantError);
+      expect(error.message).toBe('"content" is not allowed to be empty');
     }
 
     expect(mockThreadRepository.isThreadExist).toBeCalledWith(params.threadId);
     expect(mockCommentRepository.isCommentExist).toBeCalledWith(
       params.commentId
+    );
+    expect(postReplyUseCase.execute(params)).rejects.toThrow(
+      '"content" is not allowed to be empty'
     );
   });
 
@@ -142,12 +151,15 @@ describe("PostReplyUseCase", () => {
     try {
       await postReplyUseCase.execute(params);
     } catch (error) {
-      expect(error).toBeInstanceOf(InvariantError);
+      expect(error.message).toBe('"content" must be a string');
     }
 
     expect(mockThreadRepository.isThreadExist).toBeCalledWith(params.threadId);
     expect(mockCommentRepository.isCommentExist).toBeCalledWith(
       params.commentId
+    );
+    expect(postReplyUseCase.execute(params)).rejects.toThrow(
+      '"content" must be a string'
     );
   });
 
