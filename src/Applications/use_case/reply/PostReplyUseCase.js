@@ -1,6 +1,6 @@
 import PostReply from "../../../Domains/replies/entities/PostReply.js";
-import JoiValidation from "../../validation/JoiValidation.js";
-import ReplySchema from "../../validation/ReplySchema.js";
+import JoiValidation from "../../../Domains/validation/entity/JoiValidation.js";
+import ReplySchema from "../../../Domains/validation/entity/ReplySchema.js";
 
 class PostReplyUseCase {
   constructor({ replyRepository, commentRepository, threadRepository }) {

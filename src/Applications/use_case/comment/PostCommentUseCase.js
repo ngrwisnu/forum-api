@@ -1,6 +1,6 @@
 import PostComment from "../../../Domains/comments/entities/PostComment.js";
-import JoiValidation from "../../validation/JoiValidation.js";
-import CommentSchema from "../../validation/CommentSchema.js";
+import JoiValidation from "../../../Domains/validation/entity/JoiValidation.js";
+import CommentSchema from "../../../Domains/validation/entity/CommentSchema.js";
 
 class PostCommentUseCase {
   constructor({ commentRepository, threadRepository }) {

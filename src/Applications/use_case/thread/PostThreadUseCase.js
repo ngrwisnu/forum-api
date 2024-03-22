@@ -1,6 +1,6 @@
 import PostThread from "../../../Domains/threads/entities/PostThread.js";
-import JoiValidation from "../../validation/JoiValidation.js";
-import ThreadSchema from "../../validation/threadSchema.js";
+import JoiValidation from "../../../Domains/validation/entity/JoiValidation.js";
+import ThreadSchema from "../../../Domains/validation/entity/ThreadSchema.js";
 
 class PostThreadUseCase {
   constructor({ threadRepository }) {

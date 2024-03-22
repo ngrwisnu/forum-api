@@ -1,6 +1,4 @@
-import Validation from "./Validation.js";
-
-class JoiValidation extends Validation {
+class JoiValidation {
   static validate(schema, request) {
     const result = schema.validate(request);
 
