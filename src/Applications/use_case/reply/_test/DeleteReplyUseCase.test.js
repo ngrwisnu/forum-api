@@ -1,10 +1,20 @@
 import NotFoundError from "../../../../Commons/exceptions/NotFoundError";
 import CommentRepository from "../../../../Domains/comments/CommentRepository";
 import ReplyRepository from "../../../../Domains/replies/ReplyRepository";
+import GetReply from "../../../../Domains/replies/entities/GetReply";
 import ThreadRepository from "../../../../Domains/threads/ThreadRepository";
 import DeleteReplyUseCase from "../DeleteReplyUseCase";
 
 describe("DeleteReplyUseCase", () => {
+  const mockReply = new GetReply({
+    id: "reply-1",
+    content: "reply content",
+    user_id: "user-1",
+    comment_id: "comment-1",
+    is_deleted: false,
+    created_at: new Date().getTime(),
+  });
+
   it("should throw error when thread is not found", async () => {
     const mockThreadRepository = new ThreadRepository();
     mockThreadRepository.isThreadExist = jest
@@ -134,12 +144,10 @@ describe("DeleteReplyUseCase", () => {
     const mockReplyRepository = new ReplyRepository();
     mockReplyRepository.isReplyExist = jest
       .fn()
-      .mockImplementation(() =>
-        Promise.resolve({ id: "reply-1", user_id: "user-1" })
-      );
+      .mockImplementation(() => Promise.resolve());
     mockReplyRepository.getReplyById = jest
       .fn()
-      .mockImplementation(() => Promise.resolve({ user_id: "user-1" }));
+      .mockImplementation(() => Promise.resolve(mockReply));
 
     const deleteReplyUseCase = new DeleteReplyUseCase({
       replyRepository: mockReplyRepository,
@@ -188,7 +196,7 @@ describe("DeleteReplyUseCase", () => {
       .mockImplementation(() => Promise.resolve());
     mockReplyRepository.getReplyById = jest
       .fn()
-      .mockImplementation(() => Promise.resolve({ user_id: "user-1" }));
+      .mockImplementation(() => Promise.resolve(mockReply));
     mockReplyRepository.deleteReplyById = jest
       .fn()
       .mockImplementation(() => Promise.resolve(1));

@@ -1,9 +1,19 @@
 import NotFoundError from "../../../../Commons/exceptions/NotFoundError";
 import CommentRepository from "../../../../Domains/comments/CommentRepository";
+import GetComment from "../../../../Domains/comments/entities/GetComment";
 import ThreadRepository from "../../../../Domains/threads/ThreadRepository";
 import DeleteCommentUseCase from "../DeleteCommentUseCase";
 
 describe("DeleteCommentUseCase", () => {
+  const mockComment = new GetComment({
+    id: "comment-1",
+    content: "comment content",
+    user_id: "user-1",
+    thread_id: "thread-1",
+    is_deleted: false,
+    created_at: new Date().getTime(),
+  });
+
   it("should throw error when comment is not found", async () => {
     const mockCommentRepository = new CommentRepository();
     mockCommentRepository.isCommentExist = jest
@@ -99,7 +109,7 @@ describe("DeleteCommentUseCase", () => {
       .mockImplementation(() => Promise.resolve());
     mockCommentRepository.getCommentById = jest
       .fn()
-      .mockImplementation(() => Promise.resolve({ user_id: "user-1" }));
+      .mockImplementation(() => Promise.resolve(mockComment));
 
     const mockThreadRepository = new ThreadRepository();
     mockThreadRepository.isThreadExist = jest
@@ -150,7 +160,7 @@ describe("DeleteCommentUseCase", () => {
       .mockImplementation(() => Promise.resolve());
     mockCommentRepository.getCommentById = jest
       .fn()
-      .mockImplementation(() => Promise.resolve({ user_id: "user-1" }));
+      .mockImplementation(() => Promise.resolve(mockComment));
     mockCommentRepository.deleteCommentById = jest
       .fn()
       .mockImplementation(() => Promise.resolve(1));
