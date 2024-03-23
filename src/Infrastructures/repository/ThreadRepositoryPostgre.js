@@ -20,7 +20,7 @@ class ThreadRepositoryPostgre extends ThreadRepository {
 
     const result = await this._pool.query(query);
 
-    return new PostedThread({ ...result.rows[0] });
+    return new PostedThread(result.rows[0]);
   }
 
   async getThreadById(id) {

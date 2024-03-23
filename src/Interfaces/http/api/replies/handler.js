@@ -21,12 +21,12 @@ class RepliesHandler {
       commentId,
     };
 
-    const postReply = await postReplyUseCase.execute(params);
+    const addedReply = await postReplyUseCase.execute(params);
 
     const response = h.response({
       status: "success",
       data: {
-        addedReply: postReply,
+        addedReply,
       },
     });
     response.code(201);

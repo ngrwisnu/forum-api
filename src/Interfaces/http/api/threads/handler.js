@@ -14,12 +14,12 @@ class ThreadsHandler {
     const postThreadUseCase = this._container.getInstance(
       PostThreadUseCase.name
     );
-    const postThread = await postThreadUseCase.execute(id, request.payload);
+    const addedThread = await postThreadUseCase.execute(id, request.payload);
 
     const response = h.response({
       status: "success",
       data: {
-        addedThread: postThread,
+        addedThread,
       },
     });
     response.code(201);

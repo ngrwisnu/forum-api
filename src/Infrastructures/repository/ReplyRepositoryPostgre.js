@@ -22,7 +22,7 @@ class ReplyRepositoryPostgre extends ReplyRepository {
 
     const result = await this._pool.query(query);
 
-    return new PostedReply({ ...result.rows[0] });
+    return new PostedReply(result.rows[0]);
   }
 
   async getReplyById(id) {
@@ -37,7 +37,7 @@ class ReplyRepositoryPostgre extends ReplyRepository {
       throw new NotFoundError("Reply not found!");
     }
 
-    return new GetReply({ ...result.rows[0] });
+    return new GetReply(result.rows[0]);
   }
 
   async deleteReplyById(id) {

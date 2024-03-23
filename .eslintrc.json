@@ -11,5 +11,10 @@
   "rules": {
     "eqeqeq": ["error", "always"],
     "no-undef": "off"
-  }
+  },
+  "ignorePatterns": [
+    "src/Domains/**/*Repository.js",
+    "src/Applications/security/**/*.js",
+    "src/Applications/validation/**/*.js"
+  ]
 }
