@@ -1,23 +1,23 @@
 import PostComment from "../../../Domains/comments/entities/PostComment.js";
-import JoiValidation from "../../../Domains/validation/entity/JoiValidation.js";
 import CommentSchema from "../../../Domains/validation/entity/CommentSchema.js";
 
 class PostCommentUseCase {
-  constructor({ commentRepository, threadRepository }) {
+  constructor({ commentRepository, threadRepository, validation }) {
     this._commentRepository = commentRepository;
     this._threadRepository = threadRepository;
+    this._validation = validation;
   }
 
   async execute(uid, payload, threadId) {
+    await this._validation.validate(CommentSchema.POST_COMMENT, payload);
+
     await this._threadRepository.isThreadExist(threadId);
 
-    const request = JoiValidation.validate(CommentSchema.POST_COMMENT, payload);
+    payload.user_id = uid;
+    payload.thread_id = threadId;
+    payload.created_at = new Date().getTime();
 
-    request.user_id = uid;
-    request.thread_id = threadId;
-    request.created_at = new Date().getTime();
-
-    const postCommentPayload = new PostComment(request);
+    const postCommentPayload = new PostComment(payload);
 
     return this._commentRepository.postComment(postCommentPayload);
   }

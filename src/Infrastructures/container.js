@@ -13,6 +13,10 @@ import UserRepository from "../Domains/users/UserRepository.js";
 import PasswordHash from "../Applications/security/PasswordHash.js";
 import UserRepositoryPostgres from "./repository/UserRepositoryPostgres.js";
 import BcryptPasswordHash from "./security/BcryptPasswordHash.js";
+import ThreadRepositoryPostgre from "./repository/ThreadRepositoryPostgre.js";
+import CommentRepositoryPostgre from "./repository/CommentRepositoryPostgre.js";
+import ReplyRepositoryPostgre from "./repository/ReplyRepositoryPostgre.js";
+import JoiValidation from "./validation/JoiValidation.js";
 
 // use case
 import AddUserUseCase from "../Applications/use_case/AddUserUseCase.js";
@@ -23,14 +27,11 @@ import AuthenticationRepository from "../Domains/authentications/AuthenticationR
 import AuthenticationRepositoryPostgres from "./repository/AuthenticationRepositoryPostgres.js";
 import LogoutUserUseCase from "../Applications/use_case/LogoutUserUseCase.js";
 import RefreshAuthenticationUseCase from "../Applications/use_case/RefreshAuthenticationUseCase.js";
-import ThreadRepositoryPostgre from "./repository/ThreadRepositoryPostgre.js";
 import PostThreadUseCase from "../Applications/use_case/thread/PostThreadUseCase.js";
-import CommentRepositoryPostgre from "./repository/CommentRepositoryPostgre.js";
 import PostCommentUseCase from "../Applications/use_case/comment/PostCommentUseCase.js";
 import DeleteCommentUseCase from "../Applications/use_case/comment/DeleteCommentUseCase.js";
 import GetThreadByIdUseCase from "../Applications/use_case/thread/GetThreadByIdUseCase.js";
 import PostReplyUseCase from "../Applications/use_case/reply/PostReplyUseCase.js";
-import ReplyRepositoryPostgre from "./repository/ReplyRepositoryPostgre.js";
 import DeleteReplyUseCase from "../Applications/use_case/reply/DeleteReplyUseCase.js";
 
 // creating container
@@ -127,6 +128,10 @@ container.register([
       ],
     },
   },
+  {
+    key: JoiValidation.name,
+    Class: JoiValidation,
+  },
 ]);
 
 // registering use cases
@@ -213,6 +218,10 @@ container.register([
           name: "threadRepository",
           internal: ThreadRepositoryPostgre.name,
         },
+        {
+          name: "validation",
+          internal: JoiValidation.name,
+        },
       ],
     },
   },
@@ -251,6 +260,10 @@ container.register([
           name: "threadRepository",
           internal: ThreadRepositoryPostgre.name,
         },
+        {
+          name: "validation",
+          internal: JoiValidation.name,
+        },
       ],
     },
   },
@@ -288,6 +301,10 @@ container.register([
         {
           name: "threadRepository",
           internal: ThreadRepositoryPostgre.name,
+        },
+        {
+          name: "validation",
+          internal: JoiValidation.name,
         },
       ],
     },

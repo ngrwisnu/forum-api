@@ -1,6 +1,8 @@
+import InvariantError from "../../../../Commons/exceptions/InvariantError";
 import ThreadRepository from "../../../../Domains/threads/ThreadRepository";
 import PostThread from "../../../../Domains/threads/entities/PostThread";
 import PostedThread from "../../../../Domains/threads/entities/PostedThread";
+import Validation from "../../../validation/Validation";
 import PostThreadUseCase from "../PostThreadUseCase";
 
 describe("PostThreadUseCase", () => {
@@ -10,13 +12,24 @@ describe("PostThreadUseCase", () => {
       body: "thread body content",
     };
 
+    const mockValidation = new Validation();
+    mockValidation.validate = jest
+      .fn()
+      .mockImplementation(() =>
+        Promise.reject(new InvariantError("error message"))
+      );
+
     // * create instance of use case
-    const postedThreadUseCase = new PostThreadUseCase({});
+    const postedThreadUseCase = new PostThreadUseCase({
+      threadRepository: {},
+      validation: mockValidation,
+    });
 
     // * assert
     expect(postedThreadUseCase.execute("", payload)).rejects.toThrowError(
-      '"title" is not allowed to be empty'
+      InvariantError
     );
+    expect(mockValidation.validate).toBeCalledTimes(1);
   });
 
   it("should throw error when title has invalid data type", async () => {
@@ -25,13 +38,24 @@ describe("PostThreadUseCase", () => {
       body: "thread body content",
     };
 
+    const mockValidation = new Validation();
+    mockValidation.validate = jest
+      .fn()
+      .mockImplementation(() =>
+        Promise.reject(new InvariantError("error message"))
+      );
+
     // * create instance of use case
-    const postedThreadUseCase = new PostThreadUseCase({});
+    const postedThreadUseCase = new PostThreadUseCase({
+      threadRepository: {},
+      validation: mockValidation,
+    });
 
     // * assert
-    expect(postedThreadUseCase.execute("", payload)).rejects.toThrowError(
-      '"title" must be a string'
+    expect(postedThreadUseCase.execute("", payload)).rejects.toThrow(
+      InvariantError
     );
+    expect(mockValidation.validate).toBeCalledTimes(1);
   });
 
   it("should throw error when body is empty", async () => {
@@ -40,13 +64,24 @@ describe("PostThreadUseCase", () => {
       body: "",
     };
 
+    const mockValidation = new Validation();
+    mockValidation.validate = jest
+      .fn()
+      .mockImplementation(() =>
+        Promise.reject(new InvariantError("error message"))
+      );
+
     // * create instance of use case
-    const postedThreadUseCase = new PostThreadUseCase({});
+    const postedThreadUseCase = new PostThreadUseCase({
+      threadRepository: {},
+      validation: mockValidation,
+    });
 
     // * assert
     expect(postedThreadUseCase.execute("", payload)).rejects.toThrowError(
-      '"body" is not allowed to be empty'
+      InvariantError
     );
+    expect(mockValidation.validate).toBeCalledTimes(1);
   });
 
   it("should throw error when body has invalid data type", async () => {
@@ -55,13 +90,24 @@ describe("PostThreadUseCase", () => {
       body: true,
     };
 
+    const mockValidation = new Validation();
+    mockValidation.validate = jest
+      .fn()
+      .mockImplementation(() =>
+        Promise.reject(new InvariantError("error message"))
+      );
+
     // * create instance of use case
-    const postedThreadUseCase = new PostThreadUseCase({});
+    const postedThreadUseCase = new PostThreadUseCase({
+      threadRepository: {},
+      validation: mockValidation,
+    });
 
     // * assert
     expect(postedThreadUseCase.execute("", payload)).rejects.toThrowError(
-      '"body" must be a string'
+      InvariantError
     );
+    expect(mockValidation.validate).toBeCalledTimes(1);
   });
 
   it("should orchestrate the post thread action correctly", async () => {
@@ -83,6 +129,11 @@ describe("PostThreadUseCase", () => {
     });
 
     // * dependency for the use case
+    const mockValidation = new Validation();
+    mockValidation.validate = jest
+      .fn()
+      .mockImplementation(() => Promise.resolve());
+
     const mockThreadRepository = new ThreadRepository();
     mockThreadRepository.postThread = jest
       .fn()
@@ -91,6 +142,7 @@ describe("PostThreadUseCase", () => {
     // * create instance of use case
     const postedThreadUseCase = new PostThreadUseCase({
       threadRepository: mockThreadRepository,
+      validation: mockValidation,
     });
 
     // * action
@@ -114,5 +166,6 @@ describe("PostThreadUseCase", () => {
         created_at: new Date().getTime(),
       })
     );
+    expect(mockValidation.validate).toBeCalledTimes(1);
   });
 });

@@ -1,8 +1,10 @@
+import InvariantError from "../../../../Commons/exceptions/InvariantError";
 import NotFoundError from "../../../../Commons/exceptions/NotFoundError";
 import CommentRepository from "../../../../Domains/comments/CommentRepository";
 import PostComment from "../../../../Domains/comments/entities/PostComment";
 import PostedComment from "../../../../Domains/comments/entities/PostedComment";
 import ThreadRepository from "../../../../Domains/threads/ThreadRepository";
+import Validation from "../../../validation/Validation";
 import PostCommentUseCase from "../PostCommentUseCase";
 
 describe("PostCommentUseCase", () => {
@@ -11,20 +13,23 @@ describe("PostCommentUseCase", () => {
       content: "",
     };
 
-    const mockThreadRepository = new ThreadRepository();
-    mockThreadRepository.isThreadExist = jest
+    const mockValidation = new Validation();
+    mockValidation.validate = jest
       .fn()
-      .mockImplementation(() => Promise.resolve());
+      .mockImplementation(() =>
+        Promise.reject(new InvariantError("error message"))
+      );
 
     const postCommentUseCase = new PostCommentUseCase({
       commentRepository: {},
-      threadRepository: mockThreadRepository,
+      threadRepository: {},
+      validation: mockValidation,
     });
 
     expect(postCommentUseCase.execute("", payload, "")).rejects.toThrow(
-      '"content" is not allowed to be empty'
+      InvariantError
     );
-    expect(mockThreadRepository.isThreadExist).toBeCalledTimes(1);
+    expect(mockValidation.validate).toBeCalledTimes(1);
   });
 
   it("should throw error when content has invalid data type", async () => {
@@ -32,23 +37,31 @@ describe("PostCommentUseCase", () => {
       content: 10,
     };
 
-    const mockThreadRepository = new ThreadRepository();
-    mockThreadRepository.isThreadExist = jest
+    const mockValidation = new Validation();
+    mockValidation.validate = jest
       .fn()
-      .mockImplementation(() => Promise.resolve());
+      .mockImplementation(() =>
+        Promise.reject(new InvariantError("error message"))
+      );
 
     const postCommentUseCase = new PostCommentUseCase({
       commentRepository: {},
-      threadRepository: mockThreadRepository,
+      threadRepository: {},
+      validation: mockValidation,
     });
 
     expect(postCommentUseCase.execute("", payload, "")).rejects.toThrow(
-      '"content" must be a string'
+      InvariantError
     );
-    expect(mockThreadRepository.isThreadExist).toBeCalledTimes(1);
+    expect(mockValidation.validate).toBeCalledTimes(1);
   });
 
   it("should throw error when thread is not found", async () => {
+    const mockValidation = new Validation();
+    mockValidation.validate = jest
+      .fn()
+      .mockImplementation(() => Promise.resolve());
+
     const mockThreadRepository = new ThreadRepository();
     mockThreadRepository.isThreadExist = jest
       .fn()
@@ -59,6 +72,7 @@ describe("PostCommentUseCase", () => {
     const postCommentUseCase = new PostCommentUseCase({
       commentRepository: {},
       threadRepository: mockThreadRepository,
+      validation: mockValidation,
     });
 
     const params = {
@@ -67,10 +81,21 @@ describe("PostCommentUseCase", () => {
       threadId: "",
     };
 
+    try {
+      await postCommentUseCase.execute(
+        params.uid,
+        params.payload,
+        params.threadId
+      );
+    } catch (error) {
+      expect(error).toBeInstanceOf(NotFoundError);
+    }
+
+    expect(mockValidation.validate).toBeCalledTimes(1);
+    expect(mockThreadRepository.isThreadExist).toBeCalledWith(params.threadId);
     expect(
       postCommentUseCase.execute(params.uid, params.payload, params.threadId)
     ).rejects.toThrow(NotFoundError);
-    expect(mockThreadRepository.isThreadExist).toBeCalledWith(params.threadId);
   });
 
   it("should orchestrate the post comment action correctly", async () => {
@@ -90,6 +115,11 @@ describe("PostCommentUseCase", () => {
       created_at: new Date().getTime(),
     });
 
+    const mockValidation = new Validation();
+    mockValidation.validate = jest
+      .fn()
+      .mockImplementation(() => Promise.resolve());
+
     const mockCommentRepository = new CommentRepository();
     mockCommentRepository.postComment = jest
       .fn()
@@ -103,6 +133,7 @@ describe("PostCommentUseCase", () => {
     const postCommentUseCase = new PostCommentUseCase({
       commentRepository: mockCommentRepository,
       threadRepository: mockThreadRepository,
+      validation: mockValidation,
     });
 
     const params = {
@@ -117,6 +148,16 @@ describe("PostCommentUseCase", () => {
       params.threadId
     );
 
+    expect(mockValidation.validate).toBeCalledTimes(1);
+    expect(mockThreadRepository.isThreadExist).toBeCalledWith(params.threadId);
+    expect(mockCommentRepository.postComment).toBeCalledWith(
+      new PostComment({
+        content: payload.content,
+        user_id: "user-1",
+        thread_id: params.threadId,
+        created_at: new Date().getTime(),
+      })
+    );
     expect(postedComment).toStrictEqual(
       new PostedComment({
         id: "comment-1",
@@ -127,14 +168,5 @@ describe("PostCommentUseCase", () => {
         created_at: new Date(),
       })
     );
-    expect(mockCommentRepository.postComment).toBeCalledWith(
-      new PostComment({
-        content: payload.content,
-        user_id: "user-1",
-        thread_id: params.threadId,
-        created_at: new Date().getTime(),
-      })
-    );
-    expect(mockThreadRepository.isThreadExist).toBeCalledWith(params.threadId);
   });
 });

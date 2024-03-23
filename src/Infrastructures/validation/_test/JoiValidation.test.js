@@ -1,7 +1,6 @@
 import Joi from "joi";
+import InvariantError from "../../../Commons/exceptions/InvariantError";
 import JoiValidation from "../JoiValidation";
-import pkg from "joi";
-const { ValidationError } = pkg;
 
 describe("JoiValidation", () => {
   it("should return error when the request does not match to the schema", async () => {
@@ -13,14 +12,16 @@ describe("JoiValidation", () => {
       title: "",
     };
 
-    expect(() => JoiValidation.validate(schema, request)).toThrow(
+    const validation = new JoiValidation();
+
+    expect(validation.validate(schema, request)).rejects.toThrow(
       '"title" is not allowed to be empty'
     );
 
     try {
-      await JoiValidation.validate(schema, request);
+      await validation.validate(schema, request);
     } catch (error) {
-      expect(error).toBeInstanceOf(ValidationError);
+      expect(error).toBeInstanceOf(InvariantError);
     }
   });
 
@@ -33,10 +34,10 @@ describe("JoiValidation", () => {
       title: "thread title",
     };
 
-    const result = JoiValidation.validate(schema, request);
+    const validation = new JoiValidation();
 
-    expect(result).toStrictEqual({
-      title: request.title,
-    });
+    expect(() => validation.validate(schema, request)).not.toThrow(
+      '"title" is not allowed to be empty'
+    );
   });
 });

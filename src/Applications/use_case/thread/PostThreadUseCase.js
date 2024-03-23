@@ -1,19 +1,19 @@
 import PostThread from "../../../Domains/threads/entities/PostThread.js";
-import JoiValidation from "../../../Domains/validation/entity/JoiValidation.js";
 import ThreadSchema from "../../../Domains/validation/entity/ThreadSchema.js";
 
 class PostThreadUseCase {
-  constructor({ threadRepository }) {
+  constructor({ threadRepository, validation }) {
     this._threadRepository = threadRepository;
+    this._validation = validation;
   }
 
   async execute(uid, payload) {
-    const request = JoiValidation.validate(ThreadSchema.POST_THREAD, payload);
+    await this._validation.validate(ThreadSchema.POST_THREAD, payload);
 
-    request.user_id = uid;
-    request.created_at = new Date().getTime();
+    payload.user_id = uid;
+    payload.created_at = new Date().getTime();
 
-    const postThreadPayload = new PostThread(request);
+    const postThreadPayload = new PostThread(payload);
 
     return this._threadRepository.postThread(postThreadPayload);
   }
