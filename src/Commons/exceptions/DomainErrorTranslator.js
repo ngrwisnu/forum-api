@@ -1,5 +1,4 @@
 import InvariantError from "./InvariantError.js";
-import AuthenticationError from "./AuthenticationError.js";
 import AuthorizationError from "./AuthorizationError.js";
 
 const DomainErrorTranslator = {
@@ -35,10 +34,7 @@ DomainErrorTranslator._directories = {
     new InvariantError("harus mengirimkan token refresh"),
   "DELETE_AUTHENTICATION_USE_CASE.PAYLOAD_NOT_MEET_DATA_TYPE_SPECIFICATION":
     new InvariantError("refresh token harus string"),
-  "AUTHENTICATION_HELPER.NOT_AUTHENTICATED": new AuthenticationError(
-    "Missing auth"
-  ),
-  "AUTHORIZATION_HELPER.UNAUTHORIZED_USER": new AuthorizationError(
+  "AUTHORIZATION_CHECKER.UNAUTHORIZED_USER": new AuthorizationError(
     "Unauthorized"
   ),
 };

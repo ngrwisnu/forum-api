@@ -1,5 +1,3 @@
-import AuthorizationHandler from "../../helper/AuthorizationHandler.js";
-
 class DeleteReplyUseCase {
   constructor({ replyRepository, commentRepository, threadRepository }) {
     this._replyRepository = replyRepository;
@@ -14,7 +12,9 @@ class DeleteReplyUseCase {
 
     const reply = await this._replyRepository.getReplyById(replyId);
 
-    await AuthorizationHandler.isAuthorized(reply.user_id, uid);
+    if (reply.user_id !== uid) {
+      throw new Error("AUTHORIZATION_CHECKER.UNAUTHORIZED_USER");
+    }
 
     return this._replyRepository.deleteReplyById(replyId);
   }

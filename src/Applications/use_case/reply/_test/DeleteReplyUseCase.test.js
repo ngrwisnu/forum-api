@@ -165,7 +165,7 @@ describe("DeleteReplyUseCase", () => {
     try {
       await deleteReplyUseCase.execute(params);
     } catch (error) {
-      expect(error.message).toBe("AUTHORIZATION_HELPER.UNAUTHORIZED_USER");
+      expect(error.message).toBe("AUTHORIZATION_CHECKER.UNAUTHORIZED_USER");
     }
 
     expect(mockThreadRepository.isThreadExist).toBeCalledWith(params.threadId);
@@ -175,7 +175,7 @@ describe("DeleteReplyUseCase", () => {
     expect(mockReplyRepository.isReplyExist).toBeCalledWith(params.replyId);
     expect(mockReplyRepository.getReplyById).toBeCalledWith(params.replyId);
     expect(deleteReplyUseCase.execute(params)).rejects.toThrow(
-      "AUTHORIZATION_HELPER.UNAUTHORIZED_USER"
+      "AUTHORIZATION_CHECKER.UNAUTHORIZED_USER"
     );
   });
 

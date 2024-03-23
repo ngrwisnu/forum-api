@@ -1,5 +1,3 @@
-import AuthorizationHandler from "../../helper/AuthorizationHandler.js";
-
 class DeleteCommentUseCase {
   constructor({ commentRepository, threadRepository }) {
     this._commentRepository = commentRepository;
@@ -12,7 +10,9 @@ class DeleteCommentUseCase {
 
     const comment = await this._commentRepository.getCommentById(commentId);
 
-    await AuthorizationHandler.isAuthorized(comment.user_id, uid);
+    if (comment.user_id !== uid) {
+      throw new Error("AUTHORIZATION_CHECKER.UNAUTHORIZED_USER");
+    }
 
     return this._commentRepository.deleteCommentById(commentId);
   }

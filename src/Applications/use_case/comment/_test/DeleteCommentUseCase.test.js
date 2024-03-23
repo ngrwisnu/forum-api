@@ -134,7 +134,7 @@ describe("DeleteCommentUseCase", () => {
         params.commentId
       );
     } catch (error) {
-      expect(error.message).toBe("AUTHORIZATION_HELPER.UNAUTHORIZED_USER");
+      expect(error.message).toBe("AUTHORIZATION_CHECKER.UNAUTHORIZED_USER");
     }
 
     expect(mockCommentRepository.isCommentExist).toBeCalledWith(
@@ -150,7 +150,7 @@ describe("DeleteCommentUseCase", () => {
         params.threadId,
         params.commentId
       )
-    ).rejects.toThrow("AUTHORIZATION_HELPER.UNAUTHORIZED_USER");
+    ).rejects.toThrow("AUTHORIZATION_CHECKER.UNAUTHORIZED_USER");
   });
 
   it("should orchestrate the delete comment action correctly", async () => {
