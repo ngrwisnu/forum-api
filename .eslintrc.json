@@ -15,6 +15,7 @@
   "ignorePatterns": [
     "src/Domains/**/*Repository.js",
     "src/Applications/security/**/*.js",
-    "src/Applications/validation/**/*.js"
+    "src/Applications/validation/**/*.js",
+    "dist/**/*.js"
   ]
 }
