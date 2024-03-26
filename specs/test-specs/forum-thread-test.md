@@ -51,3 +51,12 @@
 - [x] Returns `succeed` when success delete the reply
 
 ---
+
+### Put Comment's Like **(OPTIONAL)**
+
+- [ ] Returns `error` when token is not provided
+- [ ] Returns `error` when the _thread_ /_comment_ is not found
+- [ ] Returns `succeed` when success add like
+- [ ] Returns `succeed` when success delete like
+
+---
