@@ -7,6 +7,7 @@ import threads from "../../Interfaces/http/api/threads/index.js";
 import comments from "../../Interfaces/http/api/comments/index.js";
 import replies from "../../Interfaces/http/api/replies/index.js";
 import Jwt from "@hapi/jwt";
+import likes from "../../Interfaces/http/api/likes/index.js";
 
 const createServer = async (container) => {
   const server = Hapi.server({
@@ -55,6 +56,10 @@ const createServer = async (container) => {
     },
     {
       plugin: replies,
+      options: { container },
+    },
+    {
+      plugin: likes,
       options: { container },
     },
   ]);
