@@ -9,10 +9,18 @@ describe("LikeRepository", () => {
     );
   });
 
+  it("should throw an error when invoke the isCommentLikedByUser abstract", async () => {
+    const likeRepo = new LikeRepository();
+
+    expect(likeRepo.isCommentLikedByUser("", "")).rejects.toThrowError(
+      "LIKE_REPOSITORY.METHOD_NOT_IMPLEMENTED"
+    );
+  });
+
   it("should throw an error when invoke the updateCommentLike abstract", async () => {
     const likeRepo = new LikeRepository();
 
-    expect(likeRepo.updateCommentLike("", "")).rejects.toThrowError(
+    expect(likeRepo.updateCommentLike("", "", true)).rejects.toThrowError(
       "LIKE_REPOSITORY.METHOD_NOT_IMPLEMENTED"
     );
   });

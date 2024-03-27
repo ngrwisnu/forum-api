@@ -1,6 +1,6 @@
-import LikeSchema from "../../../Domains/validation/entity/LikeSchema";
+import LikeSchema from "../../../Domains/validation/entity/LikeSchema.js";
 
-class PostCommentLikeUseCase {
+class UpdateCommentLikeUseCase {
   constructor({
     likeRepository,
     threadRepository,
@@ -19,12 +19,25 @@ class PostCommentLikeUseCase {
     await this._threadRepository.isThreadExist(data.threadId);
     await this._commentRepository.isCommentExist(data.commentId);
 
-    return this._likeRepository.postCommentLike(
-      data.threadId,
+    const likedStatus = await this._likeRepository.isCommentLikedByUser(
+      data.uid,
+      data.commentId
+    );
+
+    if (!likedStatus) {
+      return this._likeRepository.postCommentLike(
+        data.threadId,
+        data.commentId,
+        data.uid
+      );
+    }
+
+    return this._likeRepository.updateCommentLike(
+      data.uid,
       data.commentId,
-      data.uid
+      likedStatus.is_liked
     );
   }
 }
 
-export default PostCommentLikeUseCase;
+export default UpdateCommentLikeUseCase;

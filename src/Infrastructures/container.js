@@ -34,7 +34,7 @@ import DeleteCommentUseCase from "../Applications/use_case/comment/DeleteComment
 import GetThreadByIdUseCase from "../Applications/use_case/thread/GetThreadByIdUseCase.js";
 import PostReplyUseCase from "../Applications/use_case/reply/PostReplyUseCase.js";
 import DeleteReplyUseCase from "../Applications/use_case/reply/DeleteReplyUseCase.js";
-import PostCommentLikeUseCase from "../Applications/use_case/like/PostCommentLikeUseCase.js";
+import UpdateCommentLikeUseCase from "../Applications/use_case/like/UpdateCommentLikeUseCase.js";
 
 // creating container
 const container = createContainer();
@@ -344,8 +344,8 @@ container.register([
     },
   },
   {
-    key: PostCommentLikeUseCase.name,
-    Class: PostCommentLikeUseCase,
+    key: UpdateCommentLikeUseCase.name,
+    Class: UpdateCommentLikeUseCase,
     parameter: {
       injectType: "destructuring",
       dependencies: [

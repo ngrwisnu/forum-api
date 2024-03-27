@@ -1,4 +1,4 @@
-import PostCommentLikeUseCase from "../../../../Applications/use_case/like/PostCommentLikeUseCase.js";
+import UpdateCommentLikeUseCase from "../../../../Applications/use_case/like/UpdateCommentLikeUseCase.js";
 
 class LikesHandler {
   constructor(container) {
@@ -9,12 +9,20 @@ class LikesHandler {
   }
 
   async updateLikesByCommentIdHandler(request, h) {
-    const { id } = request.auth.credentials;
+    const { id: uid } = request.auth.credentials;
+    const { threadId, commentId } = request.params;
 
-    const postCommentLikeUseCase = this._container.getInstance(
-      PostCommentLikeUseCase.name
+    const data = {
+      uid,
+      threadId,
+      commentId,
+    };
+
+    const updateCommentLikeUseCase = this._container.getInstance(
+      UpdateCommentLikeUseCase.name
     );
-    const addedLike = await postCommentLikeUseCase.execute(id, request.payload);
+
+    await updateCommentLikeUseCase.execute(data);
 
     const response = h.response({
       status: "success",
