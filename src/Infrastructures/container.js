@@ -256,6 +256,10 @@ container.register([
           name: "replyRepository",
           internal: ReplyRepositoryPostgre.name,
         },
+        {
+          name: "likeRepository",
+          internal: LikeRepositoryPostgre.name,
+        },
       ],
     },
   },

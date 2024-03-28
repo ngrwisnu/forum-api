@@ -2,14 +2,15 @@
 import pool from "../src/Infrastructures/database/postgres/pool.js";
 
 const LikesTableTestHelper = {
-  async postLike(
+  async addLike({
     threadId = "thread-1",
     commentId = "comment-1",
-    userId = "user-1"
-  ) {
+    userId = "user-1",
+    is_liked = true,
+  }) {
     const query = {
-      text: "INSERT INTO likes(thread_id, comment_id, user_id) VALUES($1, $2, $3) RETURNING *",
-      values: [threadId, commentId, userId],
+      text: "INSERT INTO likes VALUES($1, $2, $3, $4) RETURNING *",
+      values: [threadId, userId, commentId, is_liked],
     };
 
     await pool.query(query);

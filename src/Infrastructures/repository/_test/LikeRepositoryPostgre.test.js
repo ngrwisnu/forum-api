@@ -43,9 +43,39 @@ describe("LikeRepositoryPostgre", () => {
     });
   });
 
+  describe("getCommentsLikesByThreadId", () => {
+    beforeEach(async () => {
+      await UsersTableTestHelper.addUser({
+        id: "user-2",
+        username: "stewie",
+        fullname: "stewie griffin",
+      });
+      await UsersTableTestHelper.addUser({
+        id: "user-3",
+        username: "peter",
+        fullname: "peter griffin",
+      });
+      await LikesTableTestHelper.addLike({});
+      await LikesTableTestHelper.addLike({ userId: "user-2" });
+      await LikesTableTestHelper.addLike({ userId: "user-3", is_liked: false });
+    });
+
+    it("should return total number of comment's likes", async () => {
+      const likeRepositoryPostgre = new LikeRepositoryPostgre(pool);
+
+      const result = await likeRepositoryPostgre.getCommentsLikesByThreadId(
+        "thread-1"
+      );
+
+      expect(result).toHaveLength(1);
+      expect(result[0]).toHaveProperty("comment_id");
+      expect(result[0]).toHaveProperty("count", 2);
+    });
+  });
+
   describe("isCommentLikedByUser", () => {
     beforeEach(async () => {
-      await LikesTableTestHelper.postLike();
+      await LikesTableTestHelper.addLike({});
     });
 
     it("should return comment's like status", async () => {
@@ -62,7 +92,7 @@ describe("LikeRepositoryPostgre", () => {
 
   describe("updateCommentLike", () => {
     beforeEach(async () => {
-      await LikesTableTestHelper.postLike();
+      await LikesTableTestHelper.addLike({});
     });
 
     it("should throw error when updating process failed", async () => {
