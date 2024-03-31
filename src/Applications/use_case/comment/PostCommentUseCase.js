@@ -1,5 +1,5 @@
 import PostComment from "../../../Domains/comments/entities/PostComment.js";
-import CommentSchema from "../../../Domains/validation/entity/CommentSchema.js";
+import { postCommentSchema } from "../../../Domains/validation/entity/CommentSchema.js";
 
 class PostCommentUseCase {
   constructor({ commentRepository, threadRepository, validation }) {
@@ -9,7 +9,7 @@ class PostCommentUseCase {
   }
 
   async execute(uid, payload, threadId) {
-    await this._validation.validate(CommentSchema.POST_COMMENT, payload);
+    await this._validation.validate(postCommentSchema, payload);
 
     await this._threadRepository.isThreadExist(threadId);
 

@@ -1,5 +1,5 @@
 import PostReply from "../../../Domains/replies/entities/PostReply.js";
-import ReplySchema from "../../../Domains/validation/entity/ReplySchema.js";
+import { postReplySchema } from "../../../Domains/validation/entity/ReplySchema.js";
 
 class PostReplyUseCase {
   constructor({
@@ -15,7 +15,7 @@ class PostReplyUseCase {
   }
 
   async execute({ uid, payload, threadId, commentId }) {
-    await this._validation.validate(ReplySchema.POST_REPLY, payload);
+    await this._validation.validate(postReplySchema, payload);
 
     await this._threadRepository.isThreadExist(threadId);
     await this._commentRepository.isCommentExist(commentId);

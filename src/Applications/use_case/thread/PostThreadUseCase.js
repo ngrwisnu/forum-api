@@ -1,5 +1,5 @@
 import PostThread from "../../../Domains/threads/entities/PostThread.js";
-import ThreadSchema from "../../../Domains/validation/entity/ThreadSchema.js";
+import { postThreadSchema } from "../../../Domains/validation/entity/ThreadSchema.js";
 
 class PostThreadUseCase {
   constructor({ threadRepository, validation }) {
@@ -8,7 +8,7 @@ class PostThreadUseCase {
   }
 
   async execute(uid, payload) {
-    await this._validation.validate(ThreadSchema.POST_THREAD, payload);
+    await this._validation.validate(postThreadSchema, payload);
 
     payload.user_id = uid;
     payload.created_at = new Date().getTime();
