@@ -44,6 +44,11 @@ jobs:
           CI: true
           HOST: ${{ secrets.HOST }}
           PORT: ${{ secrets.PORT }}
+          PGHOST: ${{ secrets.PGHOST }}
+          PGPORT: ${{ secrets.PGPORT }}
+          PGUSER: ${{ secrets.PGUSER }}
+          PGPASSWORD: ${{ secrets.PGPASSWORD }}
+          PGDATABASE: ${{ secrets.PGDATABASE }}
           PGHOST_TEST: ${{ secrets.PGHOST_TEST }}
           PGPORT_TEST: ${{ secrets.PGPORT_TEST }}
           PGUSER_TEST: ${{ secrets.PGUSER_TEST }}
