@@ -47,7 +47,7 @@ jobs:
           PGHOST_TEST: ${{ secrets.PGHOST_TEST }}
           PGPORT_TEST: ${{ secrets.PGPORT_TEST }}
           PGUSER_TEST: ${{ secrets.PGUSER_TEST }}
-          PGPASSWORD_TEST: postgres
+          PGPASSWORD_TEST: ${{ secrets.PGPASSWORD_TEST }}
           PGDATABASE_TEST: ${{ secrets.PGDATABASE_TEST }}
           ACCESS_TOKEN_KEY: ${{ secrets.ACCESS_TOKEN_KEY }}
           REFRESH_TOKEN_KEY: ${{ secrets.REFRESH_TOKEN_KEY }}
