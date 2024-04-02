@@ -1,4 +1,4 @@
-import LikeSchema from "../../../Domains/validation/entity/LikeSchema.js";
+import { postCommentLikeSchema } from "../../../Domains/validation/entity/LikeSchema.js";
 
 class UpdateCommentLikeUseCase {
   constructor({
@@ -14,7 +14,7 @@ class UpdateCommentLikeUseCase {
   }
 
   async execute(data) {
-    await this._validation.validate(LikeSchema.POST_COMMENT_LIKE, data);
+    await this._validation.validate(postCommentLikeSchema, data);
 
     await this._threadRepository.isThreadExist(data.threadId);
     await this._commentRepository.isCommentExist(data.commentId);
