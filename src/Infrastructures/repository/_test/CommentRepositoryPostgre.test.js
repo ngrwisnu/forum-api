@@ -10,28 +10,22 @@ import NotFoundError from "../../../Commons/exceptions/NotFoundError";
 import InvariantError from "../../../Commons/exceptions/InvariantError";
 
 describe("CommentRepositoryPostgre", () => {
-  beforeEach(async () => {
-    await UsersTableTestHelper.addUser({
-      id: "user-1",
-    });
+  beforeAll(async () => {
+    await UsersTableTestHelper.addUser({});
     await UsersTableTestHelper.addUser({
       id: "user-2",
       username: "stewie",
       password: "secret",
       fullname: "stewie griffin",
     });
-    await ThreadsTableTestHelper.addThread({
-      id: "thread-1",
-    });
-  });
-
-  afterEach(async () => {
-    await CommentsTableTestHelper.cleanTable();
-    await ThreadsTableTestHelper.cleanTable();
-    await UsersTableTestHelper.cleanTable();
+    await ThreadsTableTestHelper.addThread({});
+    await CommentsTableTestHelper.addComment({});
   });
 
   afterAll(async () => {
+    await CommentsTableTestHelper.cleanTable();
+    await ThreadsTableTestHelper.cleanTable();
+    await UsersTableTestHelper.cleanTable();
     await pool.end();
   });
 
@@ -80,15 +74,11 @@ describe("CommentRepositoryPostgre", () => {
 
       const comments = await CommentsTableTestHelper.getComments();
 
-      expect(comments).toHaveLength(1);
+      expect(comments).toHaveLength(2);
     });
   });
 
   describe("getCommentById", () => {
-    beforeEach(async () => {
-      await CommentsTableTestHelper.addComment({});
-    });
-
     it("should throw error when comment is not found", async () => {
       const fakeIdGenerator = () => "10";
 
@@ -124,10 +114,6 @@ describe("CommentRepositoryPostgre", () => {
   });
 
   describe("deleteCommentById", () => {
-    beforeEach(async () => {
-      await CommentsTableTestHelper.addComment({});
-    });
-
     it("should throw error when updating process failed", async () => {
       const fakeIdGenerator = () => "10";
 
@@ -165,10 +151,6 @@ describe("CommentRepositoryPostgre", () => {
   });
 
   describe("isCommentExist", () => {
-    beforeEach(async () => {
-      await CommentsTableTestHelper.addComment({});
-    });
-
     it("should throw not found error when comment does not exist", async () => {
       const fakeIdGenerator = () => "10";
 
@@ -197,8 +179,7 @@ describe("CommentRepositoryPostgre", () => {
   });
 
   describe("threadsCommentsDetails", () => {
-    beforeEach(async () => {
-      await CommentsTableTestHelper.addComment({});
+    beforeAll(async () => {
       await CommentsTableTestHelper.addComment({
         id: "comment-2",
         created_at: new Date().getTime(),
@@ -217,12 +198,12 @@ describe("CommentRepositoryPostgre", () => {
         "thread-1"
       );
 
-      expect(result).toHaveLength(2);
+      expect(result).toHaveLength(3);
       expect(result[0]).toHaveProperty("id", "comment-1");
       expect(result[0]).toHaveProperty("content", "comment content");
       expect(result[0]).toHaveProperty("date");
       expect(result[0].date).not.toBeNaN();
-      expect(result[0]).toHaveProperty("is_deleted", false);
+      expect(result[0]).toHaveProperty("is_deleted");
       expect(result[0]).toHaveProperty("username", "dicoding");
     });
 

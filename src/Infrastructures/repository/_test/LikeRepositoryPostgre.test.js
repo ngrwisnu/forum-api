@@ -8,20 +8,24 @@ import PostedCommentLike from "../../../Domains/likes/entities/PostedCommentLike
 import InvariantError from "../../../Commons/exceptions/InvariantError";
 
 describe("LikeRepositoryPostgre", () => {
-  beforeEach(async () => {
+  beforeAll(async () => {
     await UsersTableTestHelper.addUser({});
     await ThreadsTableTestHelper.addThread({});
     await CommentsTableTestHelper.addComment({});
   });
 
+  beforeEach(async () => {
+    await LikesTableTestHelper.addLike({});
+  });
+
   afterEach(async () => {
     await LikesTableTestHelper.cleanTable();
-    await CommentsTableTestHelper.cleanTable();
-    await ThreadsTableTestHelper.cleanTable();
-    await UsersTableTestHelper.cleanTable();
   });
 
   afterAll(async () => {
+    await CommentsTableTestHelper.cleanTable();
+    await ThreadsTableTestHelper.cleanTable();
+    await UsersTableTestHelper.cleanTable();
     await pool.end();
   });
 
@@ -39,7 +43,7 @@ describe("LikeRepositoryPostgre", () => {
 
       const likes = await LikesTableTestHelper.getLikes();
 
-      expect(likes).toHaveLength(1);
+      expect(likes).toHaveLength(2);
     });
   });
 
@@ -55,7 +59,6 @@ describe("LikeRepositoryPostgre", () => {
         username: "peter",
         fullname: "peter griffin",
       });
-      await LikesTableTestHelper.addLike({});
       await LikesTableTestHelper.addLike({ userId: "user-2" });
       await LikesTableTestHelper.addLike({ userId: "user-3", is_liked: false });
     });
@@ -74,10 +77,6 @@ describe("LikeRepositoryPostgre", () => {
   });
 
   describe("isCommentLikedByUser", () => {
-    beforeEach(async () => {
-      await LikesTableTestHelper.addLike({});
-    });
-
     it("should return comment's like status", async () => {
       const likeRepositoryPostgre = new LikeRepositoryPostgre(pool);
 
@@ -91,10 +90,6 @@ describe("LikeRepositoryPostgre", () => {
   });
 
   describe("updateCommentLike", () => {
-    beforeEach(async () => {
-      await LikesTableTestHelper.addLike({});
-    });
-
     it("should throw error when updating process failed", async () => {
       const likeRepositoryPostgre = new LikeRepositoryPostgre(pool);
 

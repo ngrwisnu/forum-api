@@ -9,6 +9,38 @@ import AuthenticationTokenManager from "../../../Applications/security/Authentic
 import RepliesTableTestHelper from "../../../../tests/RepliesTableTestHelper";
 
 describe("/replies endpoint", () => {
+  let token;
+
+  beforeEach(async () => {
+    const server = await createServer(container);
+
+    // * create user
+    await server.inject({
+      method: "POST",
+      url: "/users",
+      payload: {
+        username: "stewie",
+        password: "secret",
+        fullname: "stewie griffin",
+      },
+    });
+
+    // * login
+    const authResponse = await server.inject({
+      method: "POST",
+      url: "/authentications",
+      payload: {
+        username: "stewie",
+        password: "secret",
+      },
+    });
+
+    const authResponseJSON = JSON.parse(authResponse.payload);
+
+    // * get token
+    token = authResponseJSON.data.accessToken;
+  });
+
   beforeEach(async () => {
     await UsersTableTestHelper.addUser({
       id: "user-1",
@@ -52,32 +84,6 @@ describe("/replies endpoint", () => {
     it("should return response 400 when reply content is invalid", async () => {
       const server = await createServer(container);
 
-      // * create user
-      await server.inject({
-        method: "POST",
-        url: "/users",
-        payload: {
-          username: "stewie",
-          password: "secret",
-          fullname: "stewie griffin",
-        },
-      });
-
-      // * login
-      const authResponse = await server.inject({
-        method: "POST",
-        url: "/authentications",
-        payload: {
-          username: "stewie",
-          password: "secret",
-        },
-      });
-
-      const authResponseJSON = JSON.parse(authResponse.payload);
-
-      // * get token
-      const token = authResponseJSON.data.accessToken;
-
       const payload = {
         content: "",
       };
@@ -100,32 +106,6 @@ describe("/replies endpoint", () => {
 
     it("should return response 404 when thread is not found", async () => {
       const server = await createServer(container);
-
-      // * create user
-      await server.inject({
-        method: "POST",
-        url: "/users",
-        payload: {
-          username: "stewie",
-          password: "secret",
-          fullname: "stewie griffin",
-        },
-      });
-
-      // * login
-      const authResponse = await server.inject({
-        method: "POST",
-        url: "/authentications",
-        payload: {
-          username: "stewie",
-          password: "secret",
-        },
-      });
-
-      const authResponseJSON = JSON.parse(authResponse.payload);
-
-      // * get token
-      const token = authResponseJSON.data.accessToken;
 
       const payload = {
         content: "reply content",
@@ -150,32 +130,6 @@ describe("/replies endpoint", () => {
     it("should return response 404 when comment is not found", async () => {
       const server = await createServer(container);
 
-      // * create user
-      await server.inject({
-        method: "POST",
-        url: "/users",
-        payload: {
-          username: "stewie",
-          password: "secret",
-          fullname: "stewie griffin",
-        },
-      });
-
-      // * login
-      const authResponse = await server.inject({
-        method: "POST",
-        url: "/authentications",
-        payload: {
-          username: "stewie",
-          password: "secret",
-        },
-      });
-
-      const authResponseJSON = JSON.parse(authResponse.payload);
-
-      // * get token
-      const token = authResponseJSON.data.accessToken;
-
       const payload = {
         content: "reply content",
       };
@@ -198,32 +152,6 @@ describe("/replies endpoint", () => {
 
     it("should return response 201 when meets all the requirements", async () => {
       const server = await createServer(container);
-
-      // * create user
-      await server.inject({
-        method: "POST",
-        url: "/users",
-        payload: {
-          username: "stewie",
-          password: "secret",
-          fullname: "stewie griffin",
-        },
-      });
-
-      // * login
-      const authResponse = await server.inject({
-        method: "POST",
-        url: "/authentications",
-        payload: {
-          username: "stewie",
-          password: "secret",
-        },
-      });
-
-      const authResponseJSON = JSON.parse(authResponse.payload);
-
-      // * get token
-      const token = authResponseJSON.data.accessToken;
 
       const payload = {
         content: "reply content",
@@ -254,18 +182,6 @@ describe("/replies endpoint", () => {
 
   describe("DELETE /threads/{threadId}/comments/{commentId}/replies/{replyId}", () => {
     beforeEach(async () => {
-      const server = await createServer(container);
-
-      await server.inject({
-        method: "POST",
-        url: "/users",
-        payload: {
-          username: "stewie",
-          password: "secret",
-          fullname: "stewie griffin",
-        },
-      });
-
       await RepliesTableTestHelper.addReply({});
     });
 
@@ -286,21 +202,6 @@ describe("/replies endpoint", () => {
     it("should return response 403 when user is unauthorized", async () => {
       const server = await createServer(container);
 
-      // * login
-      const authResponse = await server.inject({
-        method: "POST",
-        url: "/authentications",
-        payload: {
-          username: "stewie",
-          password: "secret",
-        },
-      });
-
-      const authResponseJSON = JSON.parse(authResponse.payload);
-
-      // * get token
-      const token = authResponseJSON.data.accessToken;
-
       const replyResponse = await server.inject({
         method: "DELETE",
         url: "/threads/thread-1/comments/comment-1/replies/reply-1",
@@ -317,21 +218,6 @@ describe("/replies endpoint", () => {
 
     it("should return response 404 when thread is not found", async () => {
       const server = await createServer(container);
-
-      // * login
-      const authResponse = await server.inject({
-        method: "POST",
-        url: "/authentications",
-        payload: {
-          username: "stewie",
-          password: "secret",
-        },
-      });
-
-      const authResponseJSON = JSON.parse(authResponse.payload);
-
-      // * get token
-      const token = authResponseJSON.data.accessToken;
 
       const replyResponse = await server.inject({
         method: "DELETE",
@@ -351,21 +237,6 @@ describe("/replies endpoint", () => {
     it("should return response 404 when comment is not found", async () => {
       const server = await createServer(container);
 
-      // * login
-      const authResponse = await server.inject({
-        method: "POST",
-        url: "/authentications",
-        payload: {
-          username: "stewie",
-          password: "secret",
-        },
-      });
-
-      const authResponseJSON = JSON.parse(authResponse.payload);
-
-      // * get token
-      const token = authResponseJSON.data.accessToken;
-
       const replyResponse = await server.inject({
         method: "DELETE",
         url: "/threads/thread-1/comments/comment-x/replies/reply-1",
@@ -383,21 +254,6 @@ describe("/replies endpoint", () => {
 
     it("should return response 404 when reply is not found", async () => {
       const server = await createServer(container);
-
-      // * login
-      const authResponse = await server.inject({
-        method: "POST",
-        url: "/authentications",
-        payload: {
-          username: "stewie",
-          password: "secret",
-        },
-      });
-
-      const authResponseJSON = JSON.parse(authResponse.payload);
-
-      // * get token
-      const token = authResponseJSON.data.accessToken;
 
       const replyResponse = await server.inject({
         method: "DELETE",
@@ -417,23 +273,10 @@ describe("/replies endpoint", () => {
     it("should return response 200 when succeed", async () => {
       const server = await createServer(container);
 
-      // * login
-      const authResponse = await server.inject({
-        method: "POST",
-        url: "/authentications",
-        payload: {
-          username: "stewie",
-          password: "secret",
-        },
-      });
-
-      const authResponseJSON = JSON.parse(authResponse.payload);
-
-      // * get token
-      const token = authResponseJSON.data.accessToken;
       const tokenManager = container.getInstance(
         AuthenticationTokenManager.name
       );
+
       const user = await tokenManager.decodePayload(token);
 
       await RepliesTableTestHelper.addReply({
