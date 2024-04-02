@@ -4,6 +4,7 @@ import ReplyRepository from "../../../../Domains/replies/ReplyRepository";
 import GetThreadByIdUseCase from "../GetThreadByIdUseCase";
 import ThreadDetails from "../../../../Domains/threads/entities/ThreadDetails";
 import NotFoundError from "../../../../Commons/exceptions/NotFoundError";
+import LikeRepository from "../../../../Domains/likes/LikeRepository";
 
 describe("GetThreadByIdUseCase", () => {
   const mockTime = new Date();
@@ -35,6 +36,25 @@ describe("GetThreadByIdUseCase", () => {
       username: "stewie",
       is_deleted: false,
       comment_id: "comment-1",
+    },
+    {
+      id: "reply-2",
+      content: "a content",
+      date: new Date().getTime(),
+      username: "stewie",
+      is_deleted: false,
+      comment_id: "comment-x",
+    },
+  ];
+
+  const commentsLikes = [
+    {
+      comment_id: "comment-1",
+      count: 3,
+    },
+    {
+      comment_id: "comment-x",
+      count: 1,
     },
   ];
 
@@ -75,20 +95,31 @@ describe("GetThreadByIdUseCase", () => {
       .fn()
       .mockImplementation(() => Promise.resolve(replies));
 
+    const mockCommentLikeRepository = new LikeRepository();
+    mockCommentLikeRepository.getCommentsLikesByThreadId = jest
+      .fn()
+      .mockImplementation(() => Promise.resolve(commentsLikes));
+
     const mockGetThreadUseCase = new GetThreadByIdUseCase({
       threadRepository: mockThreadRepository,
       commentRepository: mockCommentRepository,
       replyRepository: mockReplyRepository,
+      likeRepository: mockCommentLikeRepository,
     });
 
     const result = await mockGetThreadUseCase.execute("thread-1");
 
-    expect(result).toStrictEqual(new ThreadDetails(thread, comments, replies));
+    expect(result).toStrictEqual(
+      new ThreadDetails(thread, comments, replies, commentsLikes)
+    );
     expect(mockThreadRepository.isThreadExist).toBeCalledWith("thread-1");
     expect(mockThreadRepository.getThreadById).toBeCalledWith("thread-1");
     expect(mockCommentRepository.threadsCommentsDetails).toBeCalledWith(
       "thread-1"
     );
     expect(mockReplyRepository.repliesDetails).toBeCalledTimes(1);
+    expect(
+      mockCommentLikeRepository.getCommentsLikesByThreadId
+    ).toBeCalledTimes(1);
   });
 });

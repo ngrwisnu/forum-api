@@ -3,7 +3,7 @@ import pool from "../src/Infrastructures/database/postgres/pool.js";
 
 const UsersTableTestHelper = {
   async addUser({
-    id = "user-123",
+    id = "user-1",
     username = "dicoding",
     password = "secret",
     fullname = "Dicoding Indonesia",

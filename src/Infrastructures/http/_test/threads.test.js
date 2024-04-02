@@ -5,6 +5,8 @@ import UsersTableTestHelper from "../../../../tests/UsersTableTestHelper";
 import AuthenticationsTableTestHelper from "../../../../tests/AuthenticationsTableTestHelper";
 import ThreadsTableTestHelper from "../../../../tests/ThreadsTableTestHelper";
 import CommentsTableTestHelper from "../../../../tests/CommentsTableTestHelper";
+import LikesTableTestHelper from "../../../../tests/LikesTableTestHelper";
+import RepliesTableTestHelper from "../../../../tests/RepliesTableTestHelper";
 
 describe("/threads endpoint", () => {
   afterAll(async () => {
@@ -12,6 +14,8 @@ describe("/threads endpoint", () => {
   });
 
   afterEach(async () => {
+    await LikesTableTestHelper.cleanTable();
+    await RepliesTableTestHelper.cleanTable();
     await CommentsTableTestHelper.cleanTable();
     await ThreadsTableTestHelper.cleanTable();
     await AuthenticationsTableTestHelper.cleanTable();
@@ -203,6 +207,8 @@ describe("/threads endpoint", () => {
         user_id: "user-1",
         created_at: new Date().getTime(),
       });
+      await RepliesTableTestHelper.addReply({});
+      await LikesTableTestHelper.addLike({});
     });
 
     it("should return error when thread is not found", async () => {
@@ -234,6 +240,12 @@ describe("/threads endpoint", () => {
       expect(threadResponseJSON.data.thread).toHaveProperty("username");
       expect(threadResponseJSON.data.thread).toHaveProperty("date");
       expect(threadResponseJSON.data.thread).toHaveProperty("comments");
+      expect(threadResponseJSON.data.thread.comments[0]).toHaveProperty(
+        "likeCount"
+      );
+      expect(threadResponseJSON.data.thread.comments[0]).toHaveProperty(
+        "replies"
+      );
     });
   });
 });
