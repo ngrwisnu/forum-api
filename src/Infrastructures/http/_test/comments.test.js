@@ -8,6 +8,38 @@ import CommentsTableTestHelper from "../../../../tests/CommentsTableTestHelper";
 import AuthenticationTokenManager from "../../../Applications/security/AuthenticationTokenManager";
 
 describe("/comments endpoint", () => {
+  let token;
+
+  beforeEach(async () => {
+    const server = await createServer(container);
+
+    // * create user
+    await server.inject({
+      method: "POST",
+      url: "/users",
+      payload: {
+        username: "stewie",
+        password: "secret",
+        fullname: "stewie griffin",
+      },
+    });
+
+    // * login
+    const authResponse = await server.inject({
+      method: "POST",
+      url: "/authentications",
+      payload: {
+        username: "stewie",
+        password: "secret",
+      },
+    });
+
+    const authResponseJSON = JSON.parse(authResponse.payload);
+
+    // * get token
+    token = authResponseJSON.data.accessToken;
+  });
+
   beforeEach(async () => {
     await UsersTableTestHelper.addUser({
       id: "user-1",
@@ -49,32 +81,6 @@ describe("/comments endpoint", () => {
     it("should return response 400 when comment content is invalid", async () => {
       const server = await createServer(container);
 
-      // * create user
-      await server.inject({
-        method: "POST",
-        url: "/users",
-        payload: {
-          username: "stewie",
-          password: "secret",
-          fullname: "stewie griffin",
-        },
-      });
-
-      // * login
-      const authResponse = await server.inject({
-        method: "POST",
-        url: "/authentications",
-        payload: {
-          username: "stewie",
-          password: "secret",
-        },
-      });
-
-      const authResponseJSON = JSON.parse(authResponse.payload);
-
-      // * get token
-      const token = authResponseJSON.data.accessToken;
-
       const payload = {
         content: "",
       };
@@ -97,32 +103,6 @@ describe("/comments endpoint", () => {
 
     it("should return response 201 when payload is valid", async () => {
       const server = await createServer(container);
-
-      // * create user
-      await server.inject({
-        method: "POST",
-        url: "/users",
-        payload: {
-          username: "stewie",
-          password: "secret",
-          fullname: "stewie griffin",
-        },
-      });
-
-      // * login
-      const authResponse = await server.inject({
-        method: "POST",
-        url: "/authentications",
-        payload: {
-          username: "stewie",
-          password: "secret",
-        },
-      });
-
-      const authResponseJSON = JSON.parse(authResponse.payload);
-
-      // * get token
-      const token = authResponseJSON.data.accessToken;
 
       const payload = {
         content: "comment content",
@@ -154,20 +134,6 @@ describe("/comments endpoint", () => {
   });
 
   describe("DELETE /threads/{threadId}/comments/{commentId}", () => {
-    beforeEach(async () => {
-      const server = await createServer(container);
-
-      await server.inject({
-        method: "POST",
-        url: "/users",
-        payload: {
-          username: "stewie",
-          password: "secret",
-          fullname: "stewie griffin",
-        },
-      });
-    });
-
     it("should return response 401 when token is not provided", async () => {
       const server = await createServer(container);
 
@@ -184,21 +150,6 @@ describe("/comments endpoint", () => {
 
     it("should return response 403 when user is unauthorized", async () => {
       const server = await createServer(container);
-
-      // * login
-      const authResponse = await server.inject({
-        method: "POST",
-        url: "/authentications",
-        payload: {
-          username: "stewie",
-          password: "secret",
-        },
-      });
-
-      const authResponseJSON = JSON.parse(authResponse.payload);
-
-      // * get token
-      const token = authResponseJSON.data.accessToken;
 
       // * create comment
       await CommentsTableTestHelper.addComment({
@@ -224,23 +175,10 @@ describe("/comments endpoint", () => {
     it("should return response 404 when thread is not found", async () => {
       const server = await createServer(container);
 
-      // * login
-      const authResponse = await server.inject({
-        method: "POST",
-        url: "/authentications",
-        payload: {
-          username: "stewie",
-          password: "secret",
-        },
-      });
-
-      const authResponseJSON = JSON.parse(authResponse.payload);
-
-      // * get token
-      const token = authResponseJSON.data.accessToken;
       const tokenManager = container.getInstance(
         AuthenticationTokenManager.name
       );
+
       const user = await tokenManager.decodePayload(token);
 
       // * create comment
@@ -267,23 +205,10 @@ describe("/comments endpoint", () => {
     it("should return response 404 when comment is not found", async () => {
       const server = await createServer(container);
 
-      // * login
-      const authResponse = await server.inject({
-        method: "POST",
-        url: "/authentications",
-        payload: {
-          username: "stewie",
-          password: "secret",
-        },
-      });
-
-      const authResponseJSON = JSON.parse(authResponse.payload);
-
-      // * get token
-      const token = authResponseJSON.data.accessToken;
       const tokenManager = container.getInstance(
         AuthenticationTokenManager.name
       );
+
       const user = await tokenManager.decodePayload(token);
 
       // * create comment
@@ -310,20 +235,6 @@ describe("/comments endpoint", () => {
     it("should return response 200 when succeed", async () => {
       const server = await createServer(container);
 
-      // * login
-      const authResponse = await server.inject({
-        method: "POST",
-        url: "/authentications",
-        payload: {
-          username: "stewie",
-          password: "secret",
-        },
-      });
-
-      const authResponseJSON = JSON.parse(authResponse.payload);
-
-      // * get token
-      const token = authResponseJSON.data.accessToken;
       const tokenManager = container.getInstance(
         AuthenticationTokenManager.name
       );

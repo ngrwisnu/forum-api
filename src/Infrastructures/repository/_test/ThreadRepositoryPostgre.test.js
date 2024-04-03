@@ -9,23 +9,21 @@ import pool from "../../database/postgres/pool";
 import ThreadRepositoryPostgre from "../ThreadRepositoryPostgre";
 
 describe("ThreadRepositoryPostgre", () => {
-  beforeEach(async () => {
+  beforeAll(async () => {
     await UsersTableTestHelper.addUser({
       id: "user-1",
       username: "stewie",
       password: "secret",
       fullname: "stewie griffin",
     });
+    await ThreadsTableTestHelper.addThread({});
   });
 
-  afterEach(async () => {
+  afterAll(async () => {
     await RepliesTableTestHelper.cleanTable();
     await CommentsTableTestHelper.cleanTable();
     await ThreadsTableTestHelper.cleanTable();
     await UsersTableTestHelper.cleanTable();
-  });
-
-  afterAll(async () => {
     await pool.end();
   });
 
@@ -76,16 +74,12 @@ describe("ThreadRepositoryPostgre", () => {
 
       const threads = await ThreadsTableTestHelper.getThreads();
 
-      expect(threads).toHaveLength(1);
-      expect(threads.length).not.toBeGreaterThan(1);
+      expect(threads).toHaveLength(2);
+      expect(threads.length).not.toBeGreaterThan(2);
     });
   });
 
   describe("getThreadById", () => {
-    beforeEach(async () => {
-      await ThreadsTableTestHelper.addThread({});
-    });
-
     it("should throw error when thread with specific id is not found", async () => {
       const fakeIdGenerator = () => "10";
 
@@ -119,10 +113,6 @@ describe("ThreadRepositoryPostgre", () => {
   });
 
   describe("isThreadExist", () => {
-    beforeEach(async () => {
-      await ThreadsTableTestHelper.addThread({});
-    });
-
     it("should throw error when thread is not exist in the database", async () => {
       const fakeIdGenerator = () => "10";
 

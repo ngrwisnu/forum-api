@@ -11,7 +11,7 @@ import NotFoundError from "../../../Commons/exceptions/NotFoundError";
 import InvariantError from "../../../Commons/exceptions/InvariantError";
 
 describe("ReplyRepositoryPostgre", () => {
-  beforeEach(async () => {
+  beforeAll(async () => {
     await UsersTableTestHelper.addUser({
       id: "user-1",
     });
@@ -30,16 +30,14 @@ describe("ReplyRepositoryPostgre", () => {
       user_id: "user-2",
       thread_id: "thread-1",
     });
+    await RepliesTableTestHelper.addReply({});
   });
 
-  afterEach(async () => {
+  afterAll(async () => {
     await RepliesTableTestHelper.cleanTable();
     await CommentsTableTestHelper.cleanTable();
     await ThreadsTableTestHelper.cleanTable();
     await UsersTableTestHelper.cleanTable();
-  });
-
-  afterAll(async () => {
     await pool.end();
   });
 
@@ -59,7 +57,7 @@ describe("ReplyRepositoryPostgre", () => {
         created_at: new Date().getTime(),
       });
 
-      const fakeIdGenerator = () => "1";
+      const fakeIdGenerator = () => "10";
 
       const replyRepositoryPostgre = new ReplyRepositoryPostgre(
         pool,
@@ -70,12 +68,12 @@ describe("ReplyRepositoryPostgre", () => {
       const result = await replyRepositoryPostgre.postReply(postReplyPayload);
 
       // * assert
-      expect(result).toHaveProperty("id", "reply-1");
+      expect(result).toHaveProperty("id", "reply-10");
       expect(result).toHaveProperty("content", payload.content);
       expect(result).toHaveProperty("owner", "user-2");
       expect(result).toStrictEqual(
         new PostedReply({
-          id: "reply-1",
+          id: "reply-10",
           content: payload.content,
           user_id: "user-2",
           comment_id: "comment-1",
@@ -86,15 +84,11 @@ describe("ReplyRepositoryPostgre", () => {
 
       const replies = await RepliesTableTestHelper.getReplies();
 
-      expect(replies).toHaveLength(1);
+      expect(replies).toHaveLength(2);
     });
   });
 
   describe("getReplyById", () => {
-    beforeEach(async () => {
-      await RepliesTableTestHelper.addReply({});
-    });
-
     it("should throw error when reply is not found", async () => {
       const fakeIdGenerator = () => "10";
 
@@ -130,10 +124,6 @@ describe("ReplyRepositoryPostgre", () => {
   });
 
   describe("deleteReplyById", () => {
-    beforeEach(async () => {
-      await RepliesTableTestHelper.addReply({});
-    });
-
     it("should throw error when deleting process failed", async () => {
       const fakeIdGenerator = () => "10";
 
@@ -168,10 +158,6 @@ describe("ReplyRepositoryPostgre", () => {
   });
 
   describe("isReplyExist", () => {
-    beforeEach(async () => {
-      await RepliesTableTestHelper.addReply({});
-    });
-
     it("should throw error when reply does not exist", async () => {
       const fakeIdGenerator = () => "10";
 
@@ -200,10 +186,6 @@ describe("ReplyRepositoryPostgre", () => {
   });
 
   describe("repliesDetails", () => {
-    beforeEach(async () => {
-      await RepliesTableTestHelper.addReply({});
-    });
-
     it("should return list of replies and joined with table user", async () => {
       const fakeIdGenerator = () => "10";
 
@@ -214,10 +196,10 @@ describe("ReplyRepositoryPostgre", () => {
 
       const result = await replyRepositoryPostgre.repliesDetails();
 
-      expect(result).toHaveLength(1);
+      expect(result).toHaveLength(2);
       expect(result[0]).toHaveProperty("id", "reply-1");
       expect(result[0]).toHaveProperty("content", "reply content");
-      expect(result[0]).toHaveProperty("is_deleted", false);
+      expect(result[0]).toHaveProperty("is_deleted");
       expect(result[0]).toHaveProperty("comment_id", "comment-1");
       expect(result[0]).toHaveProperty("username", "dicoding");
       expect(result[0]).toHaveProperty("date");

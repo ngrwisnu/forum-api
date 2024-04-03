@@ -17,6 +17,7 @@ import ThreadRepositoryPostgre from "./repository/ThreadRepositoryPostgre.js";
 import CommentRepositoryPostgre from "./repository/CommentRepositoryPostgre.js";
 import ReplyRepositoryPostgre from "./repository/ReplyRepositoryPostgre.js";
 import JoiValidation from "./validation/JoiValidation.js";
+import LikeRepositoryPostgre from "./repository/LikeRepositoryPostgre.js";
 
 // use case
 import AddUserUseCase from "../Applications/use_case/AddUserUseCase.js";
@@ -33,6 +34,7 @@ import DeleteCommentUseCase from "../Applications/use_case/comment/DeleteComment
 import GetThreadByIdUseCase from "../Applications/use_case/thread/GetThreadByIdUseCase.js";
 import PostReplyUseCase from "../Applications/use_case/reply/PostReplyUseCase.js";
 import DeleteReplyUseCase from "../Applications/use_case/reply/DeleteReplyUseCase.js";
+import UpdateCommentLikeUseCase from "../Applications/use_case/like/UpdateCommentLikeUseCase.js";
 
 // creating container
 const container = createContainer();
@@ -131,6 +133,17 @@ container.register([
   {
     key: JoiValidation.name,
     Class: JoiValidation,
+  },
+  {
+    key: LikeRepositoryPostgre.name,
+    Class: LikeRepositoryPostgre,
+    parameter: {
+      dependencies: [
+        {
+          concrete: pool,
+        },
+      ],
+    },
   },
 ]);
 
@@ -243,6 +256,10 @@ container.register([
           name: "replyRepository",
           internal: ReplyRepositoryPostgre.name,
         },
+        {
+          name: "likeRepository",
+          internal: LikeRepositoryPostgre.name,
+        },
       ],
     },
   },
@@ -326,6 +343,31 @@ container.register([
         {
           name: "threadRepository",
           internal: ThreadRepositoryPostgre.name,
+        },
+      ],
+    },
+  },
+  {
+    key: UpdateCommentLikeUseCase.name,
+    Class: UpdateCommentLikeUseCase,
+    parameter: {
+      injectType: "destructuring",
+      dependencies: [
+        {
+          name: "likeRepository",
+          internal: LikeRepositoryPostgre.name,
+        },
+        {
+          name: "threadRepository",
+          internal: ThreadRepositoryPostgre.name,
+        },
+        {
+          name: "commentRepository",
+          internal: CommentRepositoryPostgre.name,
+        },
+        {
+          name: "validation",
+          internal: JoiValidation.name,
         },
       ],
     },

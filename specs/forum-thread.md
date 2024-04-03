@@ -363,3 +363,42 @@ Response when _thread_/_comment_/_reply_ `not found`:
 ```
 
 ---
+
+## Put Comment's Like **(OPTIONAL)**
+
+Route: `PUT` `/threads/{threadId}/comments/{commentId}/likes`
+
+Headers:
+
+- Authorization: `Bearer <token>`
+
+Request body:
+
+```json
+
+```
+
+Response when `succeed`:
+
+- Status Code: `200`
+- Body:
+
+```json
+{
+  "status": "success"
+}
+```
+
+Response when _thread_/_comment_ `not found`:
+
+- Status Code: `404`
+- Body:
+
+```json
+{
+  "status": "fail",
+  "message": "not found message!"
+}
+```
+
+---

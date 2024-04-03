@@ -1,10 +1,16 @@
 import ThreadDetails from "../../../Domains/threads/entities/ThreadDetails.js";
 
 class GetThreadByIdUseCase {
-  constructor({ threadRepository, commentRepository, replyRepository }) {
+  constructor({
+    threadRepository,
+    commentRepository,
+    replyRepository,
+    likeRepository,
+  }) {
     this._threadRepository = threadRepository;
     this._commentRepository = commentRepository;
     this._replyRepository = replyRepository;
+    this._likeRepository = likeRepository;
   }
 
   async execute(threadId) {
@@ -15,8 +21,11 @@ class GetThreadByIdUseCase {
       threadId
     );
     const replies = await this._replyRepository.repliesDetails();
+    const commentsLikes = await this._likeRepository.getCommentsLikesByThreadId(
+      threadId
+    );
 
-    return new ThreadDetails(thread, comments, replies);
+    return new ThreadDetails(thread, comments, replies, commentsLikes);
   }
 }
 
